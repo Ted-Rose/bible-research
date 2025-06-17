@@ -3,3 +3,7 @@ logs/*
 venv
 ca.pem
 staticfiles
+
+# Development
+db.sqlite3
+
