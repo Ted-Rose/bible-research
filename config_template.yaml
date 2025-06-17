@@ -1,0 +1,36 @@
+# This is an example configuration file.
+# Copy this to a new file named `config.yaml` and fill in your actual values.
+# IMPORTANT: Do not commit your real `config.yaml` file to version control.
+
+DATABASES:
+  default:
+    # --- Option 1: PostgreSQL (for development or production) ---
+    # Replace these values with your actual local or cloud database credentials.
+    ENGINE: django.db.backends.postgresql
+    NAME: bibledb
+    USER: db_user
+    PASSWORD: 'your_secret_database_password'
+    HOST: localhost # Use 'localhost' for a local DB, or your DB host
+    PORT: 5432      # Default PostgreSQL port
+
+    # SSL options are usually for connecting to a managed/cloud database.
+    # You can typically comment them out for local development.
+    # OPTIONS:
+    #   sslmode: require
+    #   sslrootcert: "/path/to/your/ca.pem"
+
+    # --- Option 2: SQLite (for simple, local-only development) ---
+    # To use this, comment out the PostgreSQL settings above and uncomment these.
+    # ENGINE: django.db.backends.sqlite3
+    # NAME: 'db.sqlite3'
+
+# Set to 'true' for development to get detailed error pages.
+# IMPORTANT: This must be set to 'false' in a live production environment.
+DEBUG: true
+
+# Your API key for the ESV Bible API.
+ESV_KEY: 'your_esv_api_key_goes_here'
+
+# IMPORTANT: You still need a SECRET_KEY for Django to run.
+# Generate a new one for your project from https://djecrety.ir/
+SECRET_KEY: 'paste_a_strong_randomly_generated_secret_key_here'

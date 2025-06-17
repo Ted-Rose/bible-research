@@ -11,24 +11,21 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 """
 
 from pathlib import Path
+import yaml
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+CONFIG_FILE = BASE_DIR / 'config.yaml'
 
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
+with open(CONFIG_FILE, 'r') as f:
+    config = yaml.safe_load(f)
 
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-h&h$fwfn1@)$49$_k3a075s7*lta2@7bol)+7is@arnsr&)(a)'
-
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+SECRET_KEY = config.get('SECRET_KEY')
+DEBUG = config.get('DEBUG', False)
+ESV_KEY = config.get('ESV_KEY')
 
 ALLOWED_HOSTS = []
-
-
-# Application definition
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -70,15 +67,11 @@ TEMPLATES = [
 WSGI_APPLICATION = 'bible_research.wsgi.application'
 
 
-# Database
-# https://docs.djangoproject.com/en/4.2/ref/settings/#databases
+DATABASES = config.get('DATABASES')
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
-}
+if not DEBUG:
+    cert_path = DATABASES['default']['OPTIONS']['sslrootcert']
+    DATABASES['default']['OPTIONS']['sslrootcert'] = str(BASE_DIR / cert_path)
 
 
 # Password validation

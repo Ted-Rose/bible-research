@@ -3,6 +3,7 @@ logs/*
 venv
 ca.pem
 staticfiles
+config.yaml
 
 # Development
 db.sqlite3
