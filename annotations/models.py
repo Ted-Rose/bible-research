@@ -1,5 +1,6 @@
 import uuid
 from django.db import models
+from django.db.models import UniqueConstraint, Q
 # from django.contrib.auth import get_user_model
 
 # User = get_user_model()
@@ -10,12 +11,9 @@ class Tag(models.Model):
     Represents a user-defined tag for organizing content.
     Tags can be hierarchical (e.g., 'Love' as parent of 'Reckless love').
     """
-    # Assuming your original 'id' field is an auto-incrementing primary key.
-    # Django will create this automatically as 'id'.
-    # If your IDs are like 'TAG00001', you'd use models.CharField(max_length=10, primary_key=True)
-    # and manage ID generation yourself or with a custom field.
-    # For simplicity, we'll let Django manage it as a default AutoField.
 
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False,
+                          help_text="Unique identifier for the tag.")
     # user = models.ForeignKey(
     #     User,
     #     on_delete=models.CASCADE,
@@ -49,11 +47,27 @@ class Tag(models.Model):
     class Meta:
         verbose_name = "Tag"
         verbose_name_plural = "Tags"
-        # Ensure a user cannot create two top-level tags with the same name
+
+        # TODO: Ensure user cannot create two top-level tags with the same name
         # or two child tags with the same name under the same parent.
-        # TODO: Add in `unique_together` and `ordering` the 'user'
-        unique_together = ('name', 'parent_tag')
-        ordering = ['name']
+        # Replace first two `constraints` with this when users added:
+        # unique_together = ('user', 'name', 'parent_tag')
+        # ordering = ['name']
+
+        constraints = [
+            # Ensures unique 'name' for top-level tags (when parent_tag NULL)
+            UniqueConstraint(
+                fields=['name'],
+                condition=Q(parent_tag__isnull=True),
+                name='unique_top_level_tag_name'
+            ),
+            # Ensures 'name' is unique for child tags under the same parent
+            UniqueConstraint(
+                fields=['name', 'parent_tag'],
+                condition=Q(parent_tag__isnull=False),
+                name='unique_child_tag_name_per_parent'
+            ),
+        ]
 
     # def __str__(self):
     #     """

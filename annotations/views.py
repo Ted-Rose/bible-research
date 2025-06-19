@@ -23,7 +23,7 @@ class TagViewSet(viewsets.ModelViewSet):
         if self.request.user.is_authenticated:
             return Tag.objects.filter(user=self.request.user).order_by('name')
 
-        return Tag.objects.order_by('name')
+        return Tag.objects.all().order_by('name')
         # TODO: If not authenticated, return an empty queryset
         return Tag.objects.none()
 
@@ -34,7 +34,9 @@ class TagViewSet(viewsets.ModelViewSet):
         """
         # Automatically set the 'user' field of the tag to the requesting user.
         # This means the user does not need to provide their user ID in the request payload.
-        # TODO: serializer.save(user=self.request.user)
+        serializer.save(
+            # TODO:  user=self.request.user
+        )
 
     def perform_update(self, serializer):
         """
