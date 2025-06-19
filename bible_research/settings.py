@@ -40,6 +40,7 @@ INSTALLED_APPS = [
 
     # My apps
     'bible.apps.BibleConfig',
+    'annotations.apps.AnnotationsConfig',
 ]
 
 MIDDLEWARE = [
