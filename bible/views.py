@@ -9,6 +9,8 @@ from .services import search_passages, ESVApiError
 
 
 class VerseViewSet(viewsets.ReadOnlyModelViewSet):
+    # TODO: Check if queryset needed - currently db is not populated thus
+    # getting `no such table: bible_verse`
     queryset = Verse.objects.all()
     serializer_class = VerseSerializer
 
