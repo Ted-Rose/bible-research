@@ -1,7 +1,7 @@
-from rest_framework import viewsets
+from rest_framework import viewsets, permissions
 
-from .models import Tag
-from .serializers import TagSerializer
+from .models import Tag, Note, NoteVerse
+from .serializers import TagSerializer, NoteSerializer
 
 
 class TagViewSet(viewsets.ModelViewSet):
@@ -64,3 +64,19 @@ class TagViewSet(viewsets.ModelViewSet):
         #     )
         # instance.delete()
         raise NotImplementedError
+class NoteViewSet(viewsets.ModelViewSet):
+    """
+    API endpoint that allows notes to be created, viewed, updated, or deleted.
+    For MVP, notes are publicly accessible and manageable.
+    """
+    queryset = Note.objects.all().order_by('-created_at') # Order by most recent first
+    serializer_class = NoteSerializer
+    permission_classes = [permissions.AllowAny] # Allow any user for MVP
+
+    # The POST (create) functionality is handled automatically by ModelViewSet
+    # calling the NoteSerializer's `create` method.
+    # No explicit override of `perform_create` is needed here for your requirements.
+
+    # Similarly, default `perform_update` and `perform_destroy` are sufficient
+    # for this public MVP setup, as they rely on the serializer's behavior.
+
