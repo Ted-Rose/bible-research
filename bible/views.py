@@ -21,7 +21,6 @@ class VerseViewSet(viewsets.ReadOnlyModelViewSet):
                 status=status.HTTP_400_BAD_REQUEST
             )
         try:
-            # Call the clean, reusable service function
             results = search_passages(query)
             return Response(results)
         except ESVApiError as e:
