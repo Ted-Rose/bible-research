@@ -17,7 +17,7 @@ class TagSerializer(serializers.ModelSerializer):
         model = Tag
         fields = [
             'id',
-            'user',
+            # 'user',
             'name',
             'parent_tag',
             'created_at',
