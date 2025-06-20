@@ -3,7 +3,7 @@ from django.db import models
 
 
 class Verse(models.Model):
-    id = models.CharField(max_length=15, primary_key=True)
+    id = models.CharField(max_length=18, primary_key=True)
     book = models.CharField(max_length=50)
     chapter = models.IntegerField()
     verse = models.IntegerField()
