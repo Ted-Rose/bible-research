@@ -13,7 +13,7 @@ class Tag(models.Model):
     Tags can be hierarchical (e.g., 'Love' as parent of 'Reckless love').
     """
 
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False,
+    id = models.CharField(max_length=18, primary_key=True, editable=False,
                           help_text="Unique identifier for the tag.")
     # user = models.ForeignKey(
     #     User,
@@ -84,7 +84,7 @@ class Note(models.Model):
     Represents a user's personal note or commentary.
     Notes can be associated with a primary tag.
     """
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False,
+    id = models.CharField(max_length=18, primary_key=True, editable=False,
                           help_text="Unique identifier for the note.")
 
     tag = models.ForeignKey(
@@ -141,12 +141,13 @@ class NoteVerse(models.Model):
     Intermediary model for many-to-many relationship between Note and Verse.
     This explicit model corresponds to your 'note_verses' table.
     """
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False,
-                          help_text="Unique identifier for the note-verse link.")
+    id = models.CharField(max_length=18, primary_key=True, editable=False,
+                          help_text="Unique identifier for note-verse link.")
 
     note = models.ForeignKey(
         Note,
-        on_delete=models.CASCADE, # If a note is deleted, its links to verses are also deleted.
+        # If a note is deleted, its links to verses are also deleted.
+        on_delete=models.CASCADE,
         help_text="The note associated with the verse."
     )
 
@@ -157,7 +158,6 @@ class NoteVerse(models.Model):
     )
 
     created_at = models.DateTimeField(auto_now_add=True) # Useful for tracking when the link was made
-
 
     def save(self, *args, **kwargs):
         if not self.id:
