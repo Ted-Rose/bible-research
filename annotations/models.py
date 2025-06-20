@@ -42,7 +42,7 @@ class Tag(models.Model):
     def save(self, *args, **kwargs):
         if not self.id:
             uuid_str = str(uuid.uuid4()).upper().replace('-', '')
-            self.id = f"TAG{uuid_str[:12]}"
+            self.id = f"TAG{uuid_str[:15]}"
         super().save(*args, **kwargs)
 
     class Meta:
@@ -117,6 +117,12 @@ class Note(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+    def save(self, *args, **kwargs):
+        if not self.id:
+            uuid_str = str(uuid.uuid4()).upper().replace('-', '')
+            self.id = f"NOT{uuid_str[:15]}"
+        super().save(*args, **kwargs)
+
     class Meta:
         verbose_name = "Note"
         verbose_name_plural = "Notes"
@@ -151,6 +157,13 @@ class NoteVerse(models.Model):
     )
 
     created_at = models.DateTimeField(auto_now_add=True) # Useful for tracking when the link was made
+
+
+    def save(self, *args, **kwargs):
+        if not self.id:
+            uuid_str = str(uuid.uuid4()).upper().replace('-', '')
+            self.id = f"NVE{uuid_str[:15]}"
+        super().save(*args, **kwargs)
 
     class Meta:
         verbose_name = "Note-Verse Link"
