@@ -1,5 +1,6 @@
 Django==4.2.6
 PyYAML
+django-cors-headers
 djangorestframework
 requests
 
