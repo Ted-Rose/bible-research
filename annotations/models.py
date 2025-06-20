@@ -1,7 +1,7 @@
-import uuid
 from django.db import models
 from django.db.models import UniqueConstraint, Q
-from bible.models import Verse 
+from bible.models import Verse
+from bible_research.utils import generate_id
 # from django.contrib.auth import get_user_model
 
 # User = get_user_model()
@@ -13,8 +13,13 @@ class Tag(models.Model):
     Tags can be hierarchical (e.g., 'Love' as parent of 'Reckless love').
     """
 
-    id = models.CharField(max_length=18, primary_key=True, editable=False,
-                          help_text="Unique identifier for the tag.")
+    id = models.CharField(
+        max_length=18,
+        default=generate_id('TAG'),
+        primary_key=True,
+        editable=False,
+        help_text="Unique identifier for the tag."
+    )
     # user = models.ForeignKey(
     #     User,
     #     on_delete=models.CASCADE,
@@ -38,12 +43,6 @@ class Tag(models.Model):
     )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-
-    def save(self, *args, **kwargs):
-        if not self.id:
-            uuid_str = str(uuid.uuid4()).upper().replace('-', '')
-            self.id = f"TAG{uuid_str[:15]}"
-        super().save(*args, **kwargs)
 
     class Meta:
         verbose_name = "Tag"
@@ -84,8 +83,13 @@ class Note(models.Model):
     Represents a user's personal note or commentary.
     Notes can be associated with a primary tag.
     """
-    id = models.CharField(max_length=18, primary_key=True, editable=False,
-                          help_text="Unique identifier for the note.")
+    id = models.CharField(
+        max_length=18,
+        default=generate_id('NOT'),
+        primary_key=True,
+        editable=False,
+        help_text="Unique identifier for the note."
+    )
 
     tag = models.ForeignKey(
         Tag,
@@ -117,12 +121,6 @@ class Note(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
-    def save(self, *args, **kwargs):
-        if not self.id:
-            uuid_str = str(uuid.uuid4()).upper().replace('-', '')
-            self.id = f"NOT{uuid_str[:15]}"
-        super().save(*args, **kwargs)
-
     class Meta:
         verbose_name = "Note"
         verbose_name_plural = "Notes"
@@ -141,8 +139,13 @@ class NoteVerse(models.Model):
     Intermediary model for many-to-many relationship between Note and Verse.
     This explicit model corresponds to your 'note_verses' table.
     """
-    id = models.CharField(max_length=18, primary_key=True, editable=False,
-                          help_text="Unique identifier for note-verse link.")
+    id = models.CharField(
+        max_length=18,
+        default=generate_id('NVE'),
+        primary_key=True,
+        editable=False,
+        help_text="Unique identifier for note-verse link."
+    )
 
     note = models.ForeignKey(
         Note,
@@ -159,18 +162,13 @@ class NoteVerse(models.Model):
 
     created_at = models.DateTimeField(auto_now_add=True) # Useful for tracking when the link was made
 
-    def save(self, *args, **kwargs):
-        if not self.id:
-            uuid_str = str(uuid.uuid4()).upper().replace('-', '')
-            self.id = f"NVE{uuid_str[:15]}"
-        super().save(*args, **kwargs)
-
     class Meta:
         verbose_name = "Note-Verse Link"
         verbose_name_plural = "Note-Verse Links"
         # Ensures that a specific note is linked to a specific verse only once.
-        unique_together = ('note', 'verse')
-        ordering = ['note', 'verse']
+        # TODO: Refine uniqueness logic
+        # unique_together = ('note', 'verse')
+        # ordering = ['note', 'verse']
 
     def __str__(self):
         return f"Link: Note {self.note.id.hex[:8]} to Verse {self.verse.id}"

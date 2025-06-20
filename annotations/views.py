@@ -64,6 +64,8 @@ class TagViewSet(viewsets.ModelViewSet):
         #     )
         # instance.delete()
         raise NotImplementedError
+
+
 class NoteViewSet(viewsets.ModelViewSet):
     """
     API endpoint that allows notes to be created, viewed, updated, or deleted.
