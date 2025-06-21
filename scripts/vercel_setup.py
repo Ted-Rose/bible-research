@@ -21,7 +21,7 @@ def create_ca_pem():
 
         # Add the header and footer back with line breaks as required for pem files
         pem_content = f"-----BEGIN CERTIFICATE-----\n{formatted_content}\n-----END CERTIFICATE-----"
-        file_path = os.path.join(BASE_DIR, 'ca.pem')
+        file_path = os.path.join(os.getcwd(), 'ca.pem')
 
         with open(file_path, 'w') as file:
             file.write(pem_content)
