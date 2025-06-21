@@ -1,7 +1,7 @@
+import uuid
 from django.db import models
 from django.db.models import UniqueConstraint, Q
 from bible.models import Verse
-from bible_research.utils import generate_id
 # from django.contrib.auth import get_user_model
 
 # User = get_user_model()
@@ -15,7 +15,7 @@ class Tag(models.Model):
 
     id = models.CharField(
         max_length=18,
-        default=generate_id('TAG'),
+        default=f"TAG{str(uuid.uuid4()).upper().replace('-', '')[:15]}",
         primary_key=True,
         editable=False,
         help_text="Unique identifier for the tag."
@@ -85,7 +85,7 @@ class Note(models.Model):
     """
     id = models.CharField(
         max_length=18,
-        default=generate_id('NOT'),
+        default=f"NOT{str(uuid.uuid4()).upper().replace('-', '')[:15]}",
         primary_key=True,
         editable=False,
         help_text="Unique identifier for the note."
@@ -141,7 +141,7 @@ class NoteVerse(models.Model):
     """
     id = models.CharField(
         max_length=18,
-        default=generate_id('NVE'),
+        default=f"NVE{str(uuid.uuid4()).upper().replace('-', '')[:15]}",
         primary_key=True,
         editable=False,
         help_text="Unique identifier for note-verse link."
