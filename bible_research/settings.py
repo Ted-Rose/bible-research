@@ -27,7 +27,12 @@ DEBUG = config.get('DEBUG', False)
 ESV_KEY = config.get('ESV_KEY')
 CONFIG_FILE = BASE_DIR / 'config.yaml'
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [
+    'localhost',
+    '127.0.0.1',
+    'bible-research.vercel.app',
+    'reactive-bible.vercel.app',
+]
 
 INSTALLED_APPS = [
     'django.contrib.admin',
