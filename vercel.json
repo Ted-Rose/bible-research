@@ -9,7 +9,7 @@
       }
     },
     {
-    "src": "bible-research/wsgi.py",
+    "src": "bible_research/wsgi.py",
     "use": "@vercel/python",
     "config": { "maxLambdaSize": "15mb", "runtime": "python3.14" }
   }],
@@ -20,7 +20,7 @@
     },
     {
         "src":"/(.*)",
-        "dest":"bible-research/wsgi.py"
+        "dest":"bible_research/wsgi.py"
     }
   ]
 }
