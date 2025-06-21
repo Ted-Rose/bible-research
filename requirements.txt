@@ -3,6 +3,7 @@ PyYAML
 django-cors-headers
 djangorestframework
 requests
+psycopg2
 
 # Development
 debugpy
