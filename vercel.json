@@ -1,0 +1,26 @@
+{
+  "version": 1,
+  "builds": [
+    {
+      "src": "build_files.sh",
+      "use": "@vercel/static-build",
+      "config": {
+          "distDir": "staticfiles"
+      }
+    },
+    {
+    "src": "bible-research/wsgi.py",
+    "use": "@vercel/python",
+    "config": { "maxLambdaSize": "15mb", "runtime": "python3.14" }
+  }],
+  "routes": [
+    {
+      "src": "/static/(.*)",
+      "dest": "static/$1"
+    },
+    {
+        "src":"/(.*)",
+        "dest":"bible-research/wsgi.py"
+    }
+  ]
+}
