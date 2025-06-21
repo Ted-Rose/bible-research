@@ -1,6 +1,6 @@
 python3 -m pip install -r requirements.txt
 
-python3 bible-research/scripts/vercel_setup.py create_ca_pem create_private_settings_yaml
+python3 scripts/vercel_setup.py create_ca_pem create_private_settings_yaml
 
 # Collect static files
 python3 manage.py collectstatic --noinput
