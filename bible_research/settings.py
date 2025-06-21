@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 
 from pathlib import Path
 import yaml
+import yaml
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -24,6 +25,7 @@ with open(CONFIG_FILE, 'r') as f:
 SECRET_KEY = config.get('SECRET_KEY')
 DEBUG = config.get('DEBUG', False)
 ESV_KEY = config.get('ESV_KEY')
+CONFIG_FILE = BASE_DIR / 'config.yaml'
 
 ALLOWED_HOSTS = []
 
