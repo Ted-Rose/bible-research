@@ -1,9 +1,15 @@
+# Django imports
+from django.db.models import Count
+
+# Third-party imports
 from rest_framework import serializers
 
+# Local imports - external apps
 from bible.models import Verse
 from bible.serializers import VerseSerializer
-from .models import Note, NoteVerse, Tag
 
+# Local imports - current app
+from .models import Note, NoteVerse, Tag
 
 class TagSerializer(serializers.ModelSerializer):
     """
@@ -87,6 +93,66 @@ class NoteSerializer(serializers.ModelSerializer):
             'updated_at'
         ]
         read_only_fields = ['id', 'created_at', 'updated_at']
+
+    def validate(self, attrs):
+        """
+        Custom validation to prevent creating duplicate notes for the exact
+        same set of verses.
+        """
+        # This validation is for creation only. For updates, the logic would
+        # be more complex (e.g., excluding instance being updated from check).
+        if self.instance:
+            return attrs  # Skip this validation on updates (PUT/PATCH)
+
+        verse_references = attrs.get('verse_references')
+        if not verse_references:
+            return attrs
+
+        # Step 1: Resolve verse references to a set of Verse model instances
+        verse_instances = []
+        for ref in verse_references:
+            try:
+                verse = Verse.objects.get(
+                    book__iexact=ref['book'],
+                    chapter=ref['chapter'],
+                    verse=ref['verse']
+                )
+                verse_instances.append(verse)
+            except Verse.DoesNotExist:
+                # The 'create' method will handle raising a more specific
+                # error for this, so we can ignore it here for the purpose
+                # of duplicate checking. If a verse doesn't exist, a duplicate
+                # set can't exist either.
+                pass
+
+        if len(verse_references) != len(verse_instances):
+            # Not all provided verse references were valid, so we can't
+            # perform a reliable duplicate check. The 'create' method
+            # will fail with a proper error message.
+            return attrs
+
+        num_verses = len(verse_instances)
+        if num_verses == 0:
+            return attrs
+
+        # Step 2: Query for existing notes with the exact same set of verses.
+        # Find notes that have the same number of verses as the incoming
+        # request.
+        queryset = Note.objects.annotate(verse_count=Count('verses')).filter(verse_count=num_verses)
+
+        # Further filter this queryset to ensure that for each of our incoming verses,
+        # the note is linked to it. This effectively checks for an exact set match.
+        for verse in verse_instances:
+            queryset = queryset.filter(verses=verse)
+
+        # If any note survives this filtering, it's a duplicate.
+        if queryset.exists():
+            existing_note_id = queryset.first().id
+            raise serializers.ValidationError({
+                'verse_references': f"A note with this exact set of verses already exists (ID: {existing_note_id})."
+            })
+
+        return attrs
 
     def create(self, validated_data):
         """
