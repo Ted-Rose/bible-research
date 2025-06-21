@@ -7,6 +7,10 @@ from bible.models import Verse
 # User = get_user_model()
 
 
+def generate_tag_id():
+    return f"TAG{str(uuid.uuid4()).upper().replace('-', '')[:15]}"
+
+
 class Tag(models.Model):
     """
     Represents a user-defined tag for organizing content.
@@ -15,7 +19,7 @@ class Tag(models.Model):
 
     id = models.CharField(
         max_length=18,
-        default=f"TAG{str(uuid.uuid4()).upper().replace('-', '')[:15]}",
+        default=generate_tag_id,
         primary_key=True,
         editable=False,
         help_text="Unique identifier for the tag."
@@ -78,6 +82,10 @@ class Tag(models.Model):
     #     return f"{self.user.username}'s Tag: {self.name}"
 
 
+def generate_note_id():
+    return f"NOT{str(uuid.uuid4()).upper().replace('-', '')[:15]}"
+
+
 class Note(models.Model):
     """
     Represents a user's personal note or commentary.
@@ -85,7 +93,7 @@ class Note(models.Model):
     """
     id = models.CharField(
         max_length=18,
-        default=f"NOT{str(uuid.uuid4()).upper().replace('-', '')[:15]}",
+        default=generate_note_id,
         primary_key=True,
         editable=False,
         help_text="Unique identifier for the note."
@@ -134,6 +142,10 @@ class Note(models.Model):
         return f"Note (ID: {self.id.hex[:8]}): {truncated_text}{ellipsis}"
 
 
+def generate_note_verse_id():
+    return f"NVE{str(uuid.uuid4()).upper().replace('-', '')[:15]}"
+
+
 class NoteVerse(models.Model):
     """
     Intermediary model for many-to-many relationship between Note and Verse.
@@ -141,7 +153,7 @@ class NoteVerse(models.Model):
     """
     id = models.CharField(
         max_length=18,
-        default=f"NVE{str(uuid.uuid4()).upper().replace('-', '')[:15]}",
+        default=generate_note_verse_id,
         primary_key=True,
         editable=False,
         help_text="Unique identifier for note-verse link."

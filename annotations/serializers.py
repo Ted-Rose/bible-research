@@ -49,23 +49,17 @@ class NoteVerseReferenceSerializer(serializers.Serializer):
 
 
 class NoteSerializer(serializers.ModelSerializer):
-    """
-    Serializes Note model data.
+    """Serializes Note model data.
     - For POST/PUT: Accepts tag UUID and a list of verse
       references (book, chapter, verse).
     - For GET: Displays full tag object and full verse objects.
     """
-    # Accept UUID for tag, automatically maps to Tag instance
     tag = serializers.PrimaryKeyRelatedField(
         queryset=Tag.objects.all(),
         allow_null=True,
         required=False,
         help_text="UUID of the primary Tag associated with this note (optional)."
     )
-
-    # This field is write-only, meaning it's expected in input (POST/PUT)
-    # but not shown in output (GET).
-    # It takes a list of objects validated by NoteVerseReferenceSerializer.
     verse_references = NoteVerseReferenceSerializer(
         many=True,
         write_only=True,
@@ -78,15 +72,7 @@ class NoteSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Note
-        fields = [
-            'id',
-            'tag',
-            'note_text',
-            'verse_references',
-            'created_at',
-            'updated_at'
-        ]
-        read_only_fields = ['id', 'created_at', 'updated_at']
+        fields = ['id', 'note_text', 'created_at', 'updated_at', 'tag', 'verse_references']
 
     def create(self, validated_data):
         """
@@ -102,12 +88,6 @@ class NoteSerializer(serializers.ModelSerializer):
         if verse_references_data:
             note_verse_instances = []
             for verse_ref_data in verse_references_data:
-                # Construct the Verse ID based on your 'bible' app's ID format
-                # Example: "JOH003016" for John 3:16
-                # Ensure the prefix logic matches how your Verse IDs are stored.
-                book_prefix = verse_ref_data['book'].upper()[:3]
-                verse_id_str = f"{book_prefix}{verse_ref_data['chapter']:03d}{verse_ref_data['verse']:03d}"
-
                 try:
                     # Attempt to retrieve the Verse instance using
                     # case-insensitive book match
@@ -124,8 +104,7 @@ class NoteSerializer(serializers.ModelSerializer):
                     error_msg = (
                         f"Verse not found for '{verse_ref_data['book']} "
                         f"{verse_ref_data['chapter']}:"
-                        f"{verse_ref_data['verse']}' "
-                        f"(Expected ID: {verse_id_str}). "
+                        f"{verse_ref_data['verse']}'. "
                         f"Please ensure the verse exists in your database."
                     )
                     raise serializers.ValidationError(error_msg)
@@ -147,17 +126,12 @@ class NoteSerializer(serializers.ModelSerializer):
         # Get the default representation
         representation = super().to_representation(instance)
 
-        # Customize tag representation: If a tag is associated, serialize its full details
-        # Ensure TagSerializer is imported and available.
+        # Include full verse objects instead of just IDs
+        verses = instance.verses.all()
+        representation['verses'] = VerseSerializer(verses, many=True).data
+
+        # Include full tag object if a tag exists
         if instance.tag:
             representation['tag'] = TagSerializer(instance.tag).data
-
-        # Customize verses representation: Serialize all associated verses
-        # This uses the VerseSerializer from your 'bible' app.
-        # Ensure VerseSerializer is imported and available.
-        representation['verses'] = VerseSerializer(
-            instance.verses.all(),
-            many=True
-        ).data
 
         return representation
