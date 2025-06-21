@@ -5,7 +5,7 @@ from django.conf import settings
 from pathlib import Path
 
 
-BASE_DIR = Path(__file__).resolve().parent.parent.parent.parent
+BASE_DIR = Path(__file__).resolve().parent.parent
 
 
 def create_ca_pem():
