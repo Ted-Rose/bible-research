@@ -33,6 +33,7 @@ ALLOWED_HOSTS = [
     '127.0.0.1',
     '*.vercel.app',
     'bible-research.vercel.app',
+    'bible-research-imdtwlgzd-industr-analysers-projects.vercel.app',
 ]
 
 INSTALLED_APPS = [
