@@ -63,7 +63,7 @@ MIDDLEWARE = [
 
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173",
-    "*.vercel.app",
+    "https://*.vercel.app",
 ]
 
 ROOT_URLCONF = 'bible_research.urls'
