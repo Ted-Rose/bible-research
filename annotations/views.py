@@ -65,11 +65,6 @@ class TagViewSet(viewsets.ModelViewSet):
         # instance.delete()
         raise NotImplementedError
 
-    def get_renderer_context(self):
-        context = super().get_renderer_context()
-        context['headers'] = {'Access-Control-Allow-Origin': '*'}
-        return context
-
 
 class NoteViewSet(viewsets.ModelViewSet):
     """
