@@ -32,6 +32,7 @@ ALLOWED_HOSTS = [
     '127.0.0.1',
     'bible-research.vercel.app',
     'reactive-bible.vercel.app',
+    'bible-research-imdtwlgzd-industr-analysers-projects.vercel.app',
 ]
 
 INSTALLED_APPS = [
@@ -52,9 +53,9 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
-    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -65,6 +66,7 @@ MIDDLEWARE = [
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173",
     "https://reactive-bible.vercel.app",
+    'https://reactive-bible-4n3yzn5f6-vincent-uches-projects.vercel.app',
 ]
 
 ROOT_URLCONF = 'bible_research.urls'
