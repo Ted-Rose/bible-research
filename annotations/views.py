@@ -70,6 +70,11 @@ class TagViewSet(viewsets.ModelViewSet):
         context['headers'] = {'Access-Control-Allow-Origin': '*'}
         return context
 
+    def finalize_response(self, request, response, *args, **kwargs):
+        if response.status_code == 200:
+            response['Access-Control-Allow-Origin'] = '*'
+        return response
+
 
 class NoteViewSet(viewsets.ModelViewSet):
     """
