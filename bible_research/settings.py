@@ -13,6 +13,7 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 import os
 from pathlib import Path
 import yaml
+from corsheaders.defaults import default_headers
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -65,6 +66,18 @@ CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173",
     "https://*.vercel.app",
 ]
+
+CORS_ALLOW_HEADERS = default_headers + (
+    "Content-Type",
+    "Authorization",
+    "Accept",
+)
+
+CORS_ORIGIN_WHITELIST = (
+    "http://localhost:8000",
+    "http://localhost:5173/",
+    "https://*.vercel.app",
+    )
 
 ROOT_URLCONF = 'bible_research.urls'
 
