@@ -65,6 +65,10 @@ class TagViewSet(viewsets.ModelViewSet):
         # instance.delete()
         raise NotImplementedError
 
+    def finalize_response(self, request, response, *args, **kwargs):
+        response['Access-Control-Allow-Origin'] = '*'
+        return response
+
 
 class NoteViewSet(viewsets.ModelViewSet):
     """

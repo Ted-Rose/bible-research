@@ -31,7 +31,7 @@ CONFIG_FILE = BASE_DIR / 'config.yaml'
 ALLOWED_HOSTS = [
     'localhost',
     '127.0.0.1',
-    '*.vercel.app',
+    '.vercel.app',
     'bible-research.vercel.app',
     'bible-research-imdtwlgzd-industr-analysers-projects.vercel.app',
 ]
