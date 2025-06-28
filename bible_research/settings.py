@@ -31,6 +31,7 @@ ALLOWED_HOSTS = [
     'localhost',
     '127.0.0.1',
     'bible-research.vercel.app',
+    'reactive-bible.vercel.app',
     'bible-research-imdtwlgzd-industr-analysers-projects.vercel.app',
 ]
 
