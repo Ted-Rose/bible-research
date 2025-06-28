@@ -32,6 +32,7 @@ ALLOWED_HOSTS = [
     'localhost',
     '127.0.0.1',
     '*.vercel.app',
+    'bible-research.vercel.app',
 ]
 
 INSTALLED_APPS = [
