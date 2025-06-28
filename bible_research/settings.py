@@ -65,7 +65,7 @@ MIDDLEWARE = [
 
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173",
-    "https://*.vercel.app",
+    "https://reactive-bible.vercel.app",
     'https://reactive-bible-4n3yzn5f6-vincent-uches-projects.vercel.app',
 ]
 
