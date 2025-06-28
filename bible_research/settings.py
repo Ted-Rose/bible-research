@@ -30,8 +30,6 @@ CONFIG_FILE = BASE_DIR / 'config.yaml'
 ALLOWED_HOSTS = [
     'localhost',
     '127.0.0.1',
-    'bible-research.vercel.app',
-    'reactive-bible.vercel.app',
     '*.vercel.app',
 ]
 
@@ -65,7 +63,7 @@ MIDDLEWARE = [
 
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173",
-    "https://reactive-bible.vercel.app",
+    "*.vercel.app",
 ]
 
 ROOT_URLCONF = 'bible_research.urls'
