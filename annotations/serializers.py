@@ -1,39 +1,61 @@
+from django.contrib.auth import get_user_model
 from rest_framework import serializers
-
 from bible.models import Verse
 from bible.serializers import VerseSerializer
 from .models import Note, NoteVerse, Tag
+User = get_user_model()
+
+
+class CurrentAuthenticatedUserDefault:
+    """Custom default callable for authenticated user field.
+    Returns the current user if authenticated, otherwise None.
+    """
+    requires_context = True
+    def __call__(self, serializer_field):
+        request = serializer_field.context.get('request')
+        if (request and hasattr(request, 'user') and
+                request.user.is_authenticated):
+            return request.user
+        return None
 
 
 class TagSerializer(serializers.ModelSerializer):
-    """
-    Serializes Tag model data for API input and output.
+    """Serializes Tag model data for API input and output.
     Includes the 'parent_tag' as its primary key for relationships.
     """
     parent_tag = serializers.PrimaryKeyRelatedField(
         queryset=Tag.objects.all(),
         allow_null=True,
-        required=False
+        required=False,
+        default=None
     )
+    user = serializers.HiddenField(
+        default=CurrentAuthenticatedUserDefault()
+    )
+    name = serializers.CharField(max_length=100)
 
     class Meta:
         model = Tag
         fields = [
-            'id',
-            # 'user',
-            'name',
-            'parent_tag',
-            'created_at',
-            'updated_at',
+            'id', 'user', 'name', 'parent_tag',
+            'created_at', 'updated_at',
         ]
         # 'read_only_fields' makes sure 'id', 'created_at', 'updated_at' are
         # automatically handled by Django and not expected in user input.
         read_only_fields = ['id', 'created_at', 'updated_at']
+        extra_kwargs = {
+            'parent_tag': {'default': None}
+        }
+
+    def create(self, validated_data):
+        # Remove user if it's None to let the model use its default
+        if 'user' in validated_data and validated_data['user'] is None:
+            validated_data.pop('user')
+        return super().create(validated_data)
 
 
 class NoteVerseReferenceSerializer(serializers.Serializer):
-    """
-    Serializer to accept verse details for linking to a Note.
+    """Serializer to accept verse details for linking to a Note.
     This is for WRITE operations (e.g., when creating a Note).
     """
     book = serializers.CharField(
@@ -58,7 +80,10 @@ class NoteSerializer(serializers.ModelSerializer):
         queryset=Tag.objects.all(),
         allow_null=True,
         required=False,
-        help_text="UUID of the primary Tag associated with this note (optional)."
+        help_text="UUID of the primary Tag associated with this note."
+    )
+    user = serializers.HiddenField(
+        default=CurrentAuthenticatedUserDefault()
     )
     verse_references = NoteVerseReferenceSerializer(
         many=True,
@@ -72,7 +97,10 @@ class NoteSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Note
-        fields = ['id', 'note_text', 'created_at', 'updated_at', 'tag', 'verse_references']
+        fields = [
+            'id', 'user', 'note_text', 'created_at', 'updated_at',
+            'tag', 'verse_references'
+        ]
 
     def create(self, validated_data):
         """
@@ -80,7 +108,9 @@ class NoteSerializer(serializers.ModelSerializer):
         """
         # Pop out the 'verse_references' as it's not a direct field on the Note
         verse_references_data = validated_data.pop('verse_references', [])
-
+        # Remove user if it's None to let the model use its default
+        if 'user' in validated_data and validated_data['user'] is None:
+            validated_data.pop('user')
         # Create the Note instance using the remaining validated data
         note = Note.objects.create(**validated_data)
 
@@ -125,13 +155,10 @@ class NoteSerializer(serializers.ModelSerializer):
         """
         # Get the default representation
         representation = super().to_representation(instance)
-
         # Include full verse objects instead of just IDs
         verses = instance.verses.all()
         representation['verses'] = VerseSerializer(verses, many=True).data
-
         # Include full tag object if a tag exists
         if instance.tag:
             representation['tag'] = TagSerializer(instance.tag).data
-
         return representation
