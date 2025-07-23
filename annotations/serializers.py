@@ -54,6 +54,23 @@ class TagSerializer(serializers.ModelSerializer):
             'parent_tag': {'default': None}
         }
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        request = self.context.get('request')
+
+        # Filter parent_tag queryset based on user authentication
+        if request and hasattr(request, 'user'):
+            if request.user.is_authenticated:
+                # For authenticated users, only show their own tags
+                self.fields['parent_tag'].queryset = Tag.objects.filter(user=request.user)
+            else:
+                # For unauthenticated users, only show guest user tags
+                try:
+                    guest_user = User.objects.get(username='guest')
+                    self.fields['parent_tag'].queryset = Tag.objects.filter(user=guest_user)
+                except User.DoesNotExist:
+                    self.fields['parent_tag'].queryset = Tag.objects.none()
+
     def create(self, validated_data):
         # If user is None, try to use guest user
         if 'user' in validated_data and validated_data['user'] is None:
@@ -106,6 +123,23 @@ class NoteSerializer(serializers.ModelSerializer):
             "to link to the note."
         )
     )
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        request = self.context.get('request')
+
+        # Filter tag queryset based on user authentication
+        if request and hasattr(request, 'user'):
+            if request.user.is_authenticated:
+                # For authenticated users, only show their own tags
+                self.fields['tag'].queryset = Tag.objects.filter(user=request.user)
+            else:
+                # For unauthenticated users, only show guest user tags
+                try:
+                    guest_user = User.objects.get(username='guest')
+                    self.fields['tag'].queryset = Tag.objects.filter(user=guest_user)
+                except User.DoesNotExist:
+                    self.fields['tag'].queryset = Tag.objects.none()
 
     class Meta:
         model = Note
