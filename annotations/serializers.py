@@ -8,7 +8,7 @@ User = get_user_model()
 
 class CurrentAuthenticatedUserDefault:
     """Custom default callable for authenticated user field.
-    Returns the current user if authenticated, otherwise None.
+    Returns the current user if authenticated, otherwise the guest user.
     """
     requires_context = True
 
@@ -17,7 +17,13 @@ class CurrentAuthenticatedUserDefault:
         if (request and hasattr(request, 'user') and
                 request.user.is_authenticated):
             return request.user
-        return None
+        # Return guest user instead of None
+        try:
+            return User.objects.get(username='guest')
+        except User.DoesNotExist:
+            # If guest user doesn't exist, return None
+            # The create method will handle this case
+            return None
 
 
 class TagSerializer(serializers.ModelSerializer):
@@ -49,10 +55,14 @@ class TagSerializer(serializers.ModelSerializer):
         }
 
     def create(self, validated_data):
-        # Remove user if it's None to let the model use its default
-        # TODO: If user is not authenticated use guest user
+        # If user is None, try to use guest user
         if 'user' in validated_data and validated_data['user'] is None:
-            validated_data.pop('user')
+            try:
+                validated_data['user'] = User.objects.get(username='guest')
+            except User.DoesNotExist:
+                # If guest user doesn't exist, remove user field
+                # to let the model use its default
+                validated_data.pop('user')
         return super().create(validated_data)
 
 
@@ -110,9 +120,13 @@ class NoteSerializer(serializers.ModelSerializer):
         """
         # Pop out the 'verse_references' as it's not a direct field on the Note
         verse_references_data = validated_data.pop('verse_references', [])
-        # Remove user if it's None to let the model use its default
+        # If user is None, try to use guest user
         if 'user' in validated_data and validated_data['user'] is None:
-            validated_data.pop('user')
+            try:
+                validated_data['user'] = User.objects.get(username='guest')
+            except User.DoesNotExist:
+                # If guest user doesn't exist, remove user field
+                validated_data.pop('user')
         # Create the Note instance using the remaining validated data
         note = Note.objects.create(**validated_data)
 
