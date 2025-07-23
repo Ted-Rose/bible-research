@@ -11,6 +11,7 @@ class CurrentAuthenticatedUserDefault:
     Returns the current user if authenticated, otherwise None.
     """
     requires_context = True
+
     def __call__(self, serializer_field):
         request = serializer_field.context.get('request')
         if (request and hasattr(request, 'user') and
@@ -49,6 +50,7 @@ class TagSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         # Remove user if it's None to let the model use its default
+        # TODO: If user is not authenticated use guest user
         if 'user' in validated_data and validated_data['user'] is None:
             validated_data.pop('user')
         return super().create(validated_data)
