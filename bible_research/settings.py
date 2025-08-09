@@ -73,7 +73,6 @@ CORS_ALLOWED_ORIGINS = [
 # Allow all Vercel automatically deployed PR preview origins
 CORS_ALLOWED_ORIGIN_REGEXES = [
     r"^https://.*-vincent-uches-projects\.vercel\.app$",
-    r'^.*-industr-analysers-projects\.vercel\.app$',
 ]
 
 ROOT_URLCONF = 'bible_research.urls'
