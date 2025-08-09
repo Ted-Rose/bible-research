@@ -15,79 +15,71 @@ class DeviceAndCountryMiddleware:
     def __call__(self, request):
         # Process request before view is called
         self.process_device_info(request)
-        self.process_country_info(request)
+        self.process_language_info(request)
 
         # Continue processing the request
         response = self.get_response(request)
         return response
 
     def process_device_info(self, request):
-        """Extract and log device information from the User-Agent."""
+        """Extract device information from the User-Agent."""
         user_agent = request.META.get('HTTP_USER_AGENT', 'Unknown Device')
+        device = "Unknown Device"
 
-        android_match = re.search(
-            r'Android\s+[\d\.]+;\s+([^;)]+)',
-            user_agent
-        )
-        iphone_match = re.search(r'iPhone(?:\s+OS\s+[\d_]+)?', user_agent)
-        samsung_match = re.search(r'(SM-[A-Za-z0-9]+)', user_agent)
+        # Extract what's in the first set of parentheses
+        # Example: Mozilla/5.0 (Linux; Android 8; X) AppleWebKit/537.36...
+        # Should extract: Linux; Android 8; X
+        parentheses_match = re.search(r'\(([^\(\)]+)\)', user_agent)
+        if parentheses_match:
+            device = parentheses_match.group(1).strip()
 
-        if android_match:
-            device_model = android_match.group(1).strip()
-        elif iphone_match:
-            device_model = "iPhone"
-        elif samsung_match:
-            device_model = samsung_match.group(1)
-        else:
-            device_model = "Unknown"
-
-        # Store device info in request for potential use in views
         request.device_info = {
-            'model': device_model,
+            'device': device,
             'user_agent': user_agent
         }
 
-        # Log device information
-        print(f"Device model: {device_model}")
+        print(f"Device: {device}")
         print(f"Full user agent: {user_agent}")
 
-    def process_country_info(self, request):
-        """Extract and log country information from headers or IP."""
-        country_code = request.META.get('HTTP_CF_IPCOUNTRY', 'Unknown')
-        country_name = "Unknown"
+    def process_language_info(self, request):
+        """Extract and log accepted languages from the request."""
+        accept_language_header = request.META.get('HTTP_ACCEPT_LANGUAGE', '')
 
-        if country_code != 'Unknown':
-            try:
-                country_obj = pycountry.countries.get(alpha_2=country_code)
-                if country_obj:
-                    country_name = country_obj.name
-            except (KeyError, AttributeError):
-                pass
-            print(f"Country: {country_name} ({country_code})")
+        languages = []
+        if accept_language_header:
+            # The header format is typically like: en-US,en;q=0.9,fr;q=0.8
+            # Split by comma to get each language preference
+            for lang_pref in accept_language_header.split(','):
+                # Split by semicolon to separate language code from quality value
+                parts = lang_pref.strip().split(';')
+                lang_code = parts[0].strip()
+
+                # Get quality factor if present (defaults to 1.0 if not specified)
+                quality = 1.0
+                if len(parts) > 1 and parts[1].startswith('q='):
+                    try:
+                        quality = float(parts[1][2:])
+                    except ValueError:
+                        pass
+
+                languages.append({
+                    'code': lang_code,
+                    'quality': quality
+                })
+
+            # Sort languages by quality (highest first)
+            languages.sort(key=lambda x: x['quality'], reverse=True)
+
+        # Print the accepted languages
+        if languages:
+            print("Accepted languages:")
+            for lang in languages:
+                print(f"  {lang['code']} (q={lang['quality']})")
         else:
-            ip = request.META.get(
-                'HTTP_X_FORWARDED_FOR',
-                request.META.get('REMOTE_ADDR', '')
-            )
-            if ip and not (ip.startswith('192.168.') or
-                           ip.startswith('10.') or
-                           ip.startswith('172.')):
-                try:
-                    response = requests.get(
-                        f'http://ip-api.com/json/{ip}',
-                        timeout=2
-                    )
-                    if response.status_code == 200:
-                        data = response.json()
-                        if data.get('status') == 'success':
-                            country_name = data.get('country', 'Unknown')
-                            print(f"Country from IP: {country_name}")
-                except (requests.RequestException, ValueError):
-                    pass
-            print(f"IP: {ip}")
+            print("No language preferences specified")
 
-        # Store country info in request for potential use in views
-        request.country_info = {
-            'code': country_code,
-            'name': country_name
+        # Store language info in request for potential use in views
+        request.language_info = {
+            'languages': languages,
+            'primary_language': languages[0]['code'] if languages else None
         }
