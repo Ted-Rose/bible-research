@@ -15,7 +15,7 @@ class DeviceAndCountryMiddleware:
     def __call__(self, request):
         # Process request before view is called
         self.process_device_info(request)
-        self.process_language_info(request)
+        self.primary_language(request)
 
         # Continue processing the request
         response = self.get_response(request)
@@ -41,8 +41,7 @@ class DeviceAndCountryMiddleware:
         print(f"Device: {device}")
         print(f"Full user agent: {user_agent}")
 
-    def process_language_info(self, request):
-        """Extract and log accepted languages from the request."""
+    def primary_language(self, request):
         accept_language_header = request.META.get('HTTP_ACCEPT_LANGUAGE', '')
 
         languages = []
@@ -70,16 +69,30 @@ class DeviceAndCountryMiddleware:
             # Sort languages by quality (highest first)
             languages.sort(key=lambda x: x['quality'], reverse=True)
 
+        # Find the highest quality non-English language
+        primary_language = None
+        english_codes = ['en', 'en-US', 'en-GB']
+
+        # First try to find a non-English language
+        for lang in languages:
+            if lang['code'] not in english_codes:
+                primary_language = lang['code']
+                break
+
+        # If no non-English language found, use the highest quality language
+        if not primary_language and languages:
+            primary_language = languages[0]['code']
+
         # Print the accepted languages
         if languages:
-            print("Accepted languages:")
             for lang in languages:
                 print(f"  {lang['code']} (q={lang['quality']})")
+            print(f"Primary language: {primary_language}")
         else:
             print("No language preferences specified")
 
         # Store language info in request for potential use in views
         request.language_info = {
             'languages': languages,
-            'primary_language': languages[0]['code'] if languages else None
-        }
+            'primary_language': primary_language
+          }
