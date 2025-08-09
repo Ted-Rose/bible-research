@@ -3,6 +3,7 @@ PyYAML
 django-cors-headers
 djangorestframework
 requests
+pycountry
 psycopg2-binary==2.9.9
 
 # Development
