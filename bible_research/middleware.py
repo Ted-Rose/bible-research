@@ -1,6 +1,7 @@
+from django.contrib.auth import get_user_model
+from django.contrib.auth import login
+from django.db import transaction
 import re
-import pycountry
-import requests
 
 
 class DeviceAndCountryMiddleware:
@@ -99,20 +100,63 @@ class DeviceAndCountryMiddleware:
           }
 
     def auto_authenticate(self, request):
-        if hasattr(request, 'device_info') and hasattr(request, 'language_info'):
-            device = request.device_info.get('device')
-            primary_language = request.language_info.get('primary_language')
+        device = request.device_info.get('device')
+        primary_language = request.language_info.get('primary_language')
 
-            if device == "Linux; Android 10; K" and primary_language == "lv":
-                # Import User model only when needed to avoid circular imports
-                from django.contrib.auth import get_user_model
-                from django.contrib.auth import login
+        User = get_user_model()
 
-                User = get_user_model()
+        # Special case for Ted-Rose
+        if device == "Linux; Android 10; K" and primary_language == "lv":
+            try:
+                ted_rose_user = User.objects.get(username="ted-rose")
+                request.user = ted_rose_user
+                login(request, ted_rose_user)
+                print(f"Auto-authenticated as: {ted_rose_user.username}")
+                return
+            except User.DoesNotExist:
+                pass
+
+        try:
+            # For all other cases, create a username from language and device
+            if primary_language and device:
+                username = f"{primary_language} {device}"
+
+                if len(username) > 150:
+                    username = username[:150]
+
                 try:
-                    ted_rose_user = User.objects.get(username="ted-rose")
-                    request.user = ted_rose_user
-                    login(request, ted_rose_user)
-                    print(f"Auto-authenticated as: {ted_rose_user.username}")
+                    user = User.objects.get(username=username)
                 except User.DoesNotExist:
-                    print("Ted-Rose user not found")
+                    with transaction.atomic():
+                        user = User.objects.create_user(
+                            username=username,
+                            email=f"{username}@example.com",
+                            password=None  # No password for auto-created users
+                        )
+                        user.set_unusable_password()
+                        user.save()
+                        print(f"Created new user: {username}")
+
+                request.user = user
+                login(request, user)
+                print(f"Auto-authenticated as: {user.username}")
+                return
+        except Exception as e:
+            print(f"Auto-authentication failed: {e}")
+            username = "guest"
+            try:
+                user = User.objects.get(username=username)
+            except User.DoesNotExist:
+                with transaction.atomic():
+                    user = User.objects.create_user(
+                        username=username,
+                        email=f"{username}@example.com",
+                        password=None
+                    )
+                    user.set_unusable_password()
+                    user.save()
+                    print(f"Created new user: {username}")
+
+            request.user = user
+            login(request, user)
+            print(f"Auto-authenticated as: {user.username}")
