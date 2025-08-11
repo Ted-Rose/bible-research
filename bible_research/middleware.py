@@ -31,11 +31,16 @@ class DeviceAndCountryMiddleware:
         device = "Unknown Device"
 
         # Extract what's in the first set of parentheses
-        # Example: Mozilla/5.0 (Linux; Android 8; X) AppleWebKit/537.36...
-        # Should extract: Linux; Android 8; X
+        # Example: Mozilla/5.0 (Android 12; Mobile; rv:131.0) AppleWebKit/537
+        # Should extract: Android 12; Mobile
         parentheses_match = re.search(r'\(([^\(\)]+)\)', user_agent)
         if parentheses_match:
-            device = parentheses_match.group(1).strip()
+            content = parentheses_match.group(1).strip()
+            parts = content.split(';')
+            if len(parts) >= 2:
+                device = f"{parts[0].strip()}; {parts[1].strip()}"
+            elif len(parts) == 1:
+                device = parts[0].strip()
 
         request.device_info = {
             'device': device,
