@@ -87,13 +87,7 @@ class DeviceAndCountryMiddleware:
         if not primary_language and languages:
             primary_language = languages[0]['code']
 
-        # Print the accepted languages
-        if languages:
-            for lang in languages:
-                print(f"  {lang['code']} (q={lang['quality']})")
-            print(f"Primary language: {primary_language}")
-        else:
-            print("No language preferences specified")
+        print(f"Languages: {languages}")
 
         # Store language info in request for potential use in views
         request.language_info = {
@@ -129,7 +123,6 @@ class DeviceAndCountryMiddleware:
             request.user = user
             login(request, user)
             print(f"Auto-authenticated as: {user.username}")
-            print(f"User is authenticated: {user.is_authenticated}")
             return
         except Exception as e:
             print(f"Auto-authentication failed: {e}")

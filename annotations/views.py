@@ -75,7 +75,7 @@ class NoteViewSet(viewsets.ModelViewSet):
     Unauthenticated users see and manage the guest user's notes.
     """
     serializer_class = NoteSerializer
-    permission_classes = [permissions.AllowAny]  # Allow any user access
+    # permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
         """
