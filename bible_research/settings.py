@@ -152,6 +152,7 @@ REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework.authentication.TokenAuthentication',  # For 'Token' prefix
         'bible_research.authentication.BearerTokenAuthentication',  # For 'Bearer' prefix
+        # TODO: Enable CSRF
         'bible_research.authentication.CSRFExemptSessionAuthentication',  # Session auth without CSRF
     ],
     'DEFAULT_PERMISSION_CLASSES': [
