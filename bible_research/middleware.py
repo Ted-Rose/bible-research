@@ -17,7 +17,9 @@ class DeviceAndCountryMiddleware:
         # Process request before view is called
         self.process_device_info(request)
         self.primary_language(request)
-        self.auto_authenticate(request)
+
+        if not request.user.is_authenticated:
+            self.auto_authenticate(request)
 
         # Continue processing the request
         response = self.get_response(request)
