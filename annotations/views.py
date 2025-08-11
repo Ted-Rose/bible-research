@@ -6,6 +6,7 @@ from .serializers import TagSerializer, NoteSerializer
 
 User = get_user_model()
 
+
 class TagViewSet(viewsets.ModelViewSet):
     """
     API endpoint that allows tags to be created, viewed, updated, or deleted.
@@ -91,6 +92,7 @@ class NoteViewSet(viewsets.ModelViewSet):
 
         # For unauthenticated users, return guest user's notes
         try:
+            # TODO: Remove guest logic in rhis file as it is handled in middleware
             guest_user = User.objects.get(username='guest')
             return Note.objects.filter(user=guest_user).order_by('-created_at')
         except User.DoesNotExist:
