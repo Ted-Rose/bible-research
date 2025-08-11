@@ -18,10 +18,10 @@ class DeviceAndCountryMiddleware:
         self.process_device_info(request)
         self.primary_language(request)
 
-        if not request.user.is_authenticated:
+        path = request.path
+        if not request.user.is_authenticated and not path.startswith('/admin'):
             self.auto_authenticate(request)
 
-        # Continue processing the request
         response = self.get_response(request)
         return response
 
