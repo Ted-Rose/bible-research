@@ -120,29 +120,29 @@ class DeviceAndCountryMiddleware:
 
         try:
             # For all other cases, create a username from language and device
-            if primary_language and device:
-                username = f"{primary_language} {device}"
+            username = f"{primary_language} {device}"
 
-                if len(username) > 150:
-                    username = username[:150]
+            if len(username) > 150:
+                username = username[:150]
 
-                try:
-                    user = User.objects.get(username=username)
-                except User.DoesNotExist:
-                    with transaction.atomic():
-                        user = User.objects.create_user(
-                            username=username,
-                            email=f"{username}@example.com",
-                            password=None  # No password for auto-created users
-                        )
-                        user.set_unusable_password()
-                        user.save()
-                        print(f"Created new user: {username}")
+            try:
+                user = User.objects.get(username=username)
+            except User.DoesNotExist:
+                with transaction.atomic():
+                    user = User.objects.create_user(
+                        username=username,
+                        email=f"{username}@example.com",
+                        password=None  # No password for auto-created users
+                    )
+                    user.set_unusable_password()
+                    user.save()
+                    print(f"Created new user: {username}")
 
-                request.user = user
-                login(request, user)
-                print(f"Auto-authenticated as: {user.username}")
-                return
+            request.user = user
+            login(request, user)
+            print(f"Auto-authenticated as: {user.username}")
+            print(f"User is authenticated: {user.is_authenticated}")
+            return
         except Exception as e:
             print(f"Auto-authentication failed: {e}")
             username = "guest"
