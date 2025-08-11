@@ -2,9 +2,9 @@ import uuid
 from django.db import models
 from django.db.models import UniqueConstraint, Q
 from bible.models import Verse
-# from django.contrib.auth import get_user_model
+from django.contrib.auth import get_user_model
 
-# User = get_user_model()
+User = get_user_model()
 
 
 def generate_tag_id():
@@ -24,12 +24,14 @@ class Tag(models.Model):
         editable=False,
         help_text="Unique identifier for the tag."
     )
-    # user = models.ForeignKey(
-    #     User,
-    #     on_delete=models.CASCADE,
-    #     related_name='tags',
-    #     help_text="The user who created this tag."
-    # )
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='tags',
+        null=True,
+        blank=True,
+        help_text="The user who created this tag."
+    )
     name = models.CharField(
         max_length=100,
         # Users can have tags with the same name, but not for the same user.
@@ -73,13 +75,14 @@ class Tag(models.Model):
             ),
         ]
 
-    # def __str__(self):
-    #     """
-    #     String representation of the Tag.
-    #     """
-    #     if self.parent_tag:
-    #         return f"{self.user.username}'s Tag: {self.parent_tag.name} > {self.name}"
-    #     return f"{self.user.username}'s Tag: {self.name}"
+    def __str__(self):
+        """
+        String representation of the Tag.
+        """
+        username = self.user.username if self.user else 'guest'
+        if self.parent_tag:
+            return f"{username}'s Tag: {self.parent_tag.name} > {self.name}"
+        return f"{username}'s Tag: {self.name}"
 
 
 def generate_note_id():
@@ -97,6 +100,15 @@ class Note(models.Model):
         primary_key=True,
         editable=False,
         help_text="Unique identifier for the note."
+    )
+
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='notes',
+        null=True,
+        blank=True,
+        help_text="The user who created this note."
     )
 
     tag = models.ForeignKey(
@@ -173,7 +185,7 @@ class NoteVerse(models.Model):
         help_text="The verse associated with the note."
     )
 
-    created_at = models.DateTimeField(auto_now_add=True) # Useful for tracking when the link was made
+    created_at = models.DateTimeField(auto_now_add=True)  # Track when link was made
 
     class Meta:
         verbose_name = "Note-Verse Link"
