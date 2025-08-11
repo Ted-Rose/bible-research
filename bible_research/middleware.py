@@ -107,19 +107,7 @@ class DeviceAndCountryMiddleware:
 
         User = get_user_model()
 
-        # Special case for Ted-Rose
-        if device == "Linux; Android 10; K" and primary_language == "lv":
-            try:
-                ted_rose_user = User.objects.get(username="ted-rose")
-                request.user = ted_rose_user
-                login(request, ted_rose_user)
-                print(f"Auto-authenticated as: {ted_rose_user.username}")
-                return
-            except User.DoesNotExist:
-                pass
-
         try:
-            # For all other cases, create a username from language and device
             username = f"{primary_language} {device}"
 
             if len(username) > 150:
