@@ -61,17 +61,10 @@ class Tag(models.Model):
         # ordering = ['name']
 
         constraints = [
-            # Ensures unique 'name' for top-level tags (when parent_tag NULL)
             UniqueConstraint(
-                fields=['name'],
-                condition=Q(parent_tag__isnull=True),
-                name='unique_top_level_tag_name'
-            ),
-            # Ensures 'name' is unique for child tags under the same parent
-            UniqueConstraint(
-                fields=['name', 'parent_tag'],
+                fields=['user', 'name', 'parent_tag'],
                 condition=Q(parent_tag__isnull=False),
-                name='unique_child_tag_name_per_parent'
+                name='unique_child_tag_name_per_parent_per_user'
             ),
         ]
 
