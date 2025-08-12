@@ -22,6 +22,8 @@ class DeviceAndCountryMiddleware:
         if not request.user.is_authenticated and not path.startswith('/admin'):
             self.auto_authenticate(request)
 
+        print(f"User: {request.user}")
+
         response = self.get_response(request)
         return response
 
@@ -47,7 +49,6 @@ class DeviceAndCountryMiddleware:
             'user_agent': user_agent
         }
 
-        print(f"Device: {device}")
         print(f"Full user agent: {user_agent}")
 
     def primary_language(self, request):
