@@ -145,7 +145,8 @@ class Note(models.Model):
         # Display the first 50 characters of the note text
         truncated_text = self.note_text[:50]
         ellipsis = '...' if len(self.note_text) > 50 else ''
-        return f"Note (ID: {self.id.hex[:8]}): {truncated_text}{ellipsis}"
+        id_display = self.id[:8] if isinstance(self.id, str) else self.id.hex[:8]
+        return f"Note (ID: {id_display}): {truncated_text}{ellipsis}"
 
 
 def generate_note_verse_id():
@@ -189,4 +190,5 @@ class NoteVerse(models.Model):
         # ordering = ['note', 'verse']
 
     def __str__(self):
-        return f"Link: Note {self.note.id.hex[:8]} to Verse {self.verse.id}"
+        note_id_display = self.note.id[:8] if isinstance(self.note.id, str) else self.note.id.hex[:8]
+        return f"Link: Note {note_id_display} to Verse {self.verse.id}"
