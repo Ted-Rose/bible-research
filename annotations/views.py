@@ -1,11 +1,10 @@
-from rest_framework import viewsets, permissions
+from rest_framework import viewsets
 from django.contrib.auth import get_user_model
 
 from .models import Tag, Note
 from .serializers import TagSerializer, NoteSerializer
 
 User = get_user_model()
-
 
 class TagViewSet(viewsets.ModelViewSet):
     """
@@ -14,7 +13,6 @@ class TagViewSet(viewsets.ModelViewSet):
     Users can only see and manage their own tags.
     """
     serializer_class = TagSerializer
-    # permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
         """
@@ -73,7 +71,9 @@ class NoteViewSet(viewsets.ModelViewSet):
     """
     API endpoint that allows notes to be created, viewed, updated, or deleted.
     Authenticated users see and manage their own notes.
-    Unauthenticated users see and manage the guest user's notes.
+
+    Additional filtering:
+    - GET /api/v1/notes/?tag_id={tag_id} - List notes filtered by tag ID
     """
     serializer_class = NoteSerializer
     # permission_classes = [permissions.IsAuthenticated]
@@ -92,9 +92,11 @@ class NoteViewSet(viewsets.ModelViewSet):
 
         # For unauthenticated users, return guest user's notes
         try:
-            # TODO: Remove guest logic in rhis file as it is handled in middleware
+            # TODO: Remove guest logic in this file as it is handled in middleware
             guest_user = User.objects.get(username='guest')
-            return Note.objects.filter(user=guest_user).order_by('-created_at')
+            return Note.objects.filter(
+                user=guest_user
+            ).order_by('-created_at')
         except User.DoesNotExist:
             # If guest user doesn't exist, return empty queryset
             return Note.objects.none()
@@ -115,3 +117,20 @@ class NoteViewSet(viewsets.ModelViewSet):
                 # Let the serializer handle this case
                 serializer.save()
 
+    def get_queryset(self):
+        """
+        Returns the queryset of notes that the current user has access to.
+        Authenticated users see their own notes.
+
+        Supports filtering by tag_id via query parameter:
+        GET /api/v1/notes/?tag_id=<tag_id>
+        """
+
+        if self.request.user.is_authenticated:
+            queryset = Note.objects.filter(user=self.request.user)
+
+        tag_id = self.request.query_params.get('tag_id', None)
+        if tag_id is not None:
+            queryset = queryset.filter(tag_id=tag_id)
+
+        return queryset.order_by('-created_at')
