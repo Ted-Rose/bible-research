@@ -119,6 +119,11 @@ class Note(models.Model):
         help_text="The actual content of the note."
     )
 
+    public = models.BooleanField(
+        default=False,
+        help_text="If True, this note is accessible to unauthenticated users."
+    )
+
     # Many-to-many relationship with Verse model, through the NoteVerse
     # intermediary table. This explicit 'through' model is necessary because
     # you have 'note_verses' table in your schema, which implies additional
@@ -179,7 +184,7 @@ class NoteVerse(models.Model):
         help_text="The verse associated with the note."
     )
 
-    created_at = models.DateTimeField(auto_now_add=True)  # Track when link was made
+    created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         verbose_name = "Note-Verse Link"
@@ -190,5 +195,8 @@ class NoteVerse(models.Model):
         # ordering = ['note', 'verse']
 
     def __str__(self):
-        note_id_display = self.note.id[:8] if isinstance(self.note.id, str) else self.note.id.hex[:8]
+        if isinstance(self.note.id, str):
+            note_id_display = self.note.id[:8]
+        else:
+            note_id_display = self.note.id.hex[:8]
         return f"Link: Note {note_id_display} to Verse {self.verse.id}"
