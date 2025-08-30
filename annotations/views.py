@@ -90,6 +90,33 @@ class NoteViewSet(viewsets.ModelViewSet):
         if self.request.user.is_authenticated:
             serializer.save(user=self.request.user)
 
+    def perform_update(self, serializer):
+        """
+        Ensures that a user can only update their own notes.
+        Raises PermissionDenied if a user attempts to update another user's note.
+        """
+        instance = serializer.instance
+        if (self.request.user.is_authenticated and
+                instance.user != self.request.user):
+            from rest_framework.exceptions import PermissionDenied
+            raise PermissionDenied(
+                "You do not have permission to update this note."
+            )
+        serializer.save()
+
+    def perform_destroy(self, instance):
+        """
+        Ensures that a user can only delete their own notes.
+        Raises PermissionDenied if a user attempts to delete another user's note.
+        """
+        if (self.request.user.is_authenticated and
+                instance.user != self.request.user):
+            from rest_framework.exceptions import PermissionDenied
+            raise PermissionDenied(
+                "You do not have permission to delete this note."
+            )
+        instance.delete()
+
     def get_queryset(self):
         """
         Returns the queryset of notes that the current user has access to.
