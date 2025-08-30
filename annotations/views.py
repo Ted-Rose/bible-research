@@ -98,15 +98,26 @@ class NoteViewSet(viewsets.ModelViewSet):
 
         Supports filtering via query parameters:
         - GET /api/v1/notes/?tag_id=<tag_id> - Filter by tag ID
-        - GET /api/v1/notes/?public=true - List all public notes and user's own notes
+        - GET /api/v1/notes/?public=true:
+          List all public notes and user's own notes
+
+        Special cases:
+        - When requesting a specific note by ID:
+          Users see the note if it's public or their own
+        - When filtering by tag_id:
+          Users see all public notes with that tag and their own notes
         """
 
         public_param = self.request.query_params.get('public', '')
         public_filter = public_param.lower() == 'true'
 
+        tag_id = self.request.query_params.get('tag_id', None)
+        note_id = self.kwargs.get('pk', None)
+        specific_request = note_id is not None or tag_id is not None
+
         if self.request.user.is_authenticated:
-            if public_filter:
-                # When public=true, show all public notes and user's own notes
+            if public_filter or specific_request:
+                # Show all public notes and user's own notes
                 queryset = Note.objects.filter(
                     models.Q(public=True) | models.Q(user=self.request.user)
                 )
@@ -114,14 +125,14 @@ class NoteViewSet(viewsets.ModelViewSet):
                 # Default: show only the user's private notes
                 queryset = Note.objects.filter(
                     user=self.request.user,
-                    public=False
                 )
         else:
             # Unauthenticated users only see public notes
             queryset = Note.objects.filter(public=True)
 
-        tag_id = self.request.query_params.get('tag_id', None)
         if tag_id is not None:
-            queryset = queryset.filter(tag_id=tag_id)
+            queryset = Note.objects.filter(
+                    models.Q(public=True) | models.Q(tag_id=tag_id)
+                )
 
         return queryset.order_by('-created_at')
