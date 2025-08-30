@@ -144,7 +144,7 @@ class NoteSerializer(serializers.ModelSerializer):
     class Meta:
         model = Note
         fields = [
-            'id', 'user', 'note_text', 'created_at', 'updated_at',
+            'id', 'user', 'note_text', 'public', 'created_at', 'updated_at',
             'tag', 'verse_references'
         ]
 

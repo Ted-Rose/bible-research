@@ -30,6 +30,7 @@ CONFIG_FILE = BASE_DIR / 'config.yaml'
 ALLOWED_HOSTS = [
     'localhost',
     '127.0.0.1',
+    '0.0.0.0',
     'bible-research.vercel.app',
     'reactive-bible.vercel.app',
     'bible-research-imdtwlgzd-industr-analysers-projects.vercel.app',

@@ -118,9 +118,11 @@ class DeviceAndCountryMiddleware:
             except User.DoesNotExist:
                 with transaction.atomic():
                     user = User.objects.create_user(
+                        # TODO: Generate random username, device name should
+                        # be in the name and surname
                         username=username,
                         email=f"{username}@example.com",
-                        password=None  # No password for auto-created users
+                        password=None,
                     )
                     user.set_unusable_password()
                     user.save()
