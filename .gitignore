@@ -5,6 +5,10 @@ ca.pem
 staticfiles
 config.yaml
 
+db_backups/*
+!db_backups/local_db_backup.sh
+.DS_Store
+
 # Development
 db.sqlite3
 
