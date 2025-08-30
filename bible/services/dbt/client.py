@@ -1,196 +1,197 @@
 """
-Wrapper for the DBT API client.
-This module provides a simplified interface to the DBT API client.
+Client for the Digital Bible Platform API (Bible Brain).
+This module provides a direct interface to the DBT API using requests.
 """
 import os
+import json
+import logging
+import requests
 import yaml
+from typing import Dict, Optional, Any
 from django.conf import settings
-from bible.dbt_client.openapi_client.api import (
-    BiblesApi,
-    BooksApi,
-    ChaptersApi,
-    VersesApi,
-    SearchApi,
-)
-from bible.dbt_client.openapi_client.configuration import Configuration
-from bible.dbt_client.openapi_client.api_client import ApiClient
+
+logger = logging.getLogger(__name__)
+
+
+class DBTClientError(Exception):
+    """Exception raised for DBT API client errors."""
+    pass
 
 
 class DBTClient:
     """
-    Client for the Digital Bible Platform API.
-    This class provides a simplified interface to the DBT API client.
+    Client for the Digital Bible Platform API (Bible Brain).
+    This class provides a direct interface to the DBT API using requests.
     """
+
+    BASE_URL = "https://4.dbt.io"
 
     def __init__(self):
         """
         Initialize the DBT API client.
-
-        Args:
-            api_key: The API key for the DBT API. If not provided, it will be
-                    retrieved from config.yaml or Django settings.
         """
-        config_path = os.path.join(
-            settings.BASE_DIR, 'config.yaml'
-            )
+        # Load API key from config file
+        config_path = os.path.join(settings.BASE_DIR, 'config.yaml')
         with open(config_path, 'r') as config_file:
             config = yaml.safe_load(config_file)
             self.api_key = config.get('DBT_API_KEY')
 
-        # Configure the API client
-        self.configuration = Configuration()
-        self.configuration.api_key['key'] = self.api_key
-        self.configuration.host = "https://4.dbt.io"
-    
-        # Create the API client
-        self.api_client = ApiClient(self.configuration)
-    
-        # Initialize API instances
-        self.bibles_api = BiblesApi(self.api_client)
-        self.books_api = BooksApi(self.api_client)
-        self.chapters_api = ChaptersApi(self.api_client)
-        self.verses_api = VersesApi(self.api_client)
-        self.search_api = SearchApi(self.api_client)
+        if not self.api_key:
+            raise DBTClientError("DBT API key not found in config.yaml")
 
-    def get_bibles(self, language=None, **kwargs):
+        # Initialize session
+        self.session = requests.Session()
+        self.session.params = {'key': self.api_key, 'v': '4'}
+        self.session.headers.update({
+            'Accept': 'application/json',
+            'User-Agent': 'BibleResearchApp/1.0'
+        })
+
+    def _make_request(
+        self, endpoint: str, params: Optional[Dict[str, Any]] = None
+    ) -> Dict[str, Any]:
+        """
+        Make a request to the API.
+
+        Args:
+            endpoint: The API endpoint path
+            params: Query parameters
+
+        Returns:
+            The JSON response
+
+        Raises:
+            DBTClientError: If the request fails
+        """
+        url = f"{self.BASE_URL}/{endpoint}"
+        try:
+            response = self.session.get(url, params=params, timeout=30)
+            response.raise_for_status()
+            return response.json()
+        except requests.exceptions.RequestException as e:
+            logger.error(f"Error making request to DBT API: {e}")
+            raise DBTClientError(f"Error making request to DBT API: {e}")
+        except json.JSONDecodeError as e:
+            logger.error(f"Error decoding JSON response from DBT API: {e}")
+            raise DBTClientError(
+                f"Error decoding JSON response from DBT API: {e}"
+            )
+
+    def get_bibles(self, language: Optional[str] = None) -> Dict[str, Any]:
         """
         Get a list of available Bibles.
 
         Args:
             language: Filter by language code (e.g., 'eng' for English)
-            **kwargs: Additional parameters to pass to the API
 
         Returns:
-            List of Bible objects
+            Dictionary containing the list of Bibles
         """
-        return self.bibles_api.v4_bibles_get(language=language, **kwargs)
+        params = {}
+        if language:
+            params['language'] = language
+        return self._make_request('bibles', params)
 
-    def get_bible(self, bible_id, **kwargs):
+    def get_bible(self, bible_id: str) -> Dict[str, Any]:
         """
         Get information about a specific Bible.
-    
+
         Args:
             bible_id: The ID of the Bible
-            **kwargs: Additional parameters to pass to the API
-        
-        Returns:
-            Bible object
-        """
-        return self.bibles_api.v4_bibles_id_get(id=bible_id, **kwargs)
 
-    def get_books(self, bible_id, **kwargs):
+        Returns:
+            Dictionary containing Bible information
+        """
+        return self._make_request(f'bibles/{bible_id}')
+
+    def get_books(self, bible_id: str) -> Dict[str, Any]:
         """
         Get a list of books for a specific Bible.
-    
+
         Args:
             bible_id: The ID of the Bible
-            **kwargs: Additional parameters to pass to the API
-        
-        Returns:
-            List of Book objects
-        """
-        return self.books_api.v4_bibles_bible_id_books_get(
-            bible_id=bible_id, **kwargs
-        )
 
-    def get_book(self, bible_id, book_id, **kwargs):
+        Returns:
+            Dictionary containing the list of books
+        """
+        return self._make_request(f'bibles/{bible_id}/books')
+
+    def get_book(self, bible_id: str, book_id: str) -> Dict[str, Any]:
         """
         Get information about a specific book.
-    
+
         Args:
             bible_id: The ID of the Bible
             book_id: The ID of the book
-            **kwargs: Additional parameters to pass to the API
-        
-        Returns:
-            Book object
-        """
-        return self.books_api.v4_bibles_bible_id_books_book_id_get(
-            bible_id=bible_id, book_id=book_id, **kwargs
-        )
 
-    def get_chapters(self, bible_id, book_id, **kwargs):
+        Returns:
+            Dictionary containing book information
+        """
+        return self._make_request(f'bibles/{bible_id}/books/{book_id}')
+
+    def get_chapters(self, bible_id: str, book_id: str) -> Dict[str, Any]:
         """
         Get a list of chapters for a specific book.
-    
+
         Args:
             bible_id: The ID of the Bible
             book_id: The ID of the book
-            **kwargs: Additional parameters to pass to the API
-        
-        Returns:
-            List of Chapter objects
-        """
-        return self.chapters_api.v4_bibles_bible_id_books_book_id_chapters_get(
-            bible_id=bible_id, book_id=book_id, **kwargs
-        )
 
-    def get_chapter(self, bible_id, chapter_id, **kwargs):
+        Returns:
+            Dictionary containing the list of chapters
+        """
+        return self._make_request(f'bibles/{bible_id}/books/{book_id}/chapters')
+
+    def get_chapter(self, bible_id: str, chapter_id: str) -> Dict[str, Any]:
         """
         Get information about a specific chapter.
-    
+
         Args:
             bible_id: The ID of the Bible
             chapter_id: The ID of the chapter
-            **kwargs: Additional parameters to pass to the API
-        
-        Returns:
-            Chapter object
-        """
-        return self.chapters_api.v4_bibles_bible_id_chapters_chapter_id_get(
-            bible_id=bible_id, chapter_id=chapter_id, **kwargs
-        )
 
-    def get_verses(self, bible_id, chapter_id, **kwargs):
+        Returns:
+            Dictionary containing chapter information
+        """
+        return self._make_request(f'bibles/{bible_id}/chapters/{chapter_id}')
+
+    def get_verses(self, bible_id: str, chapter_id: str) -> Dict[str, Any]:
         """
         Get a list of verses for a specific chapter.
-    
+
         Args:
             bible_id: The ID of the Bible
             chapter_id: The ID of the chapter
-            **kwargs: Additional parameters to pass to the API
-        
-        Returns:
-            List of Verse objects
-        """
-        return self.verses_api.v4_bibles_bible_id_chapters_chapter_id_verses_get(
-            bible_id=bible_id,
-            chapter_id=chapter_id,
-            **kwargs
-        )
 
-    def get_verse(self, bible_id, verse_id, **kwargs):
+        Returns:
+            Dictionary containing the list of verses
+        """
+        endpoint = f'bibles/{bible_id}/chapters/{chapter_id}/verses'
+        return self._make_request(endpoint)
+
+    def get_verse(self, bible_id: str, verse_id: str) -> Dict[str, Any]:
         """
         Get information about a specific verse.
-    
+
         Args:
             bible_id: The ID of the Bible
             verse_id: The ID of the verse
-            **kwargs: Additional parameters to pass to the API
-        
-        Returns:
-            Verse object
-        """
-        return self.verses_api.v4_bibles_bible_id_verses_verse_id_get(
-            bible_id=bible_id,
-            verse_id=verse_id,
-            **kwargs
-        )
 
-    def search(self, bible_id, query, **kwargs):
+        Returns:
+            Dictionary containing verse information
+        """
+        return self._make_request(f'bibles/{bible_id}/verses/{verse_id}')
+
+    def search(self, bible_id: str, query: str) -> Dict[str, Any]:
         """
         Search for verses in a Bible.
-    
+
         Args:
             bible_id: The ID of the Bible
             query: The search query
-            **kwargs: Additional parameters to pass to the API
-        
+
         Returns:
-            Search results
+            Dictionary containing search results
         """
-        return self.search_api.v4_bibles_bible_id_search_get(
-            bible_id=bible_id,
-            query=query,
-            **kwargs
-        )
+        params = {'query': query}
+        return self._make_request(f'bibles/{bible_id}/search', params)
