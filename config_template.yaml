@@ -34,3 +34,5 @@ ESV_KEY: 'your_esv_api_key_goes_here'
 # IMPORTANT: You still need a SECRET_KEY for Django to run.
 # Generate a new one for your project from https://djecrety.ir/
 SECRET_KEY: 'paste_a_strong_randomly_generated_secret_key_here'
+
+DBT_KEY: 'your_dbt_api_key_goes_here'
