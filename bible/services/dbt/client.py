@@ -178,36 +178,30 @@ class DBTClient:
 
     def get_verses(
         self,
-        bible_id: str,
-        chapter_id: str,
+        book: str,
+        chapter: str,
+        bible_id: str = "ENGESV",
         **kwargs
     ) -> Dict[str, Any]:
         """
         Get verses for a specific chapter.
 
         Args:
-            bible_id: Bible ID
-            chapter_id: Chapter ID
+            bible_id: Bible ID (called fileset_id in the DBT API)
+            book: Book ID
+            chapter: Chapter ID
             **kwargs: Additional query parameters
 
         Returns:
             Dictionary with verse data
         """
-        # In the API, we need to use the fileset ID
-        # We'll assume bible_id is the fileset_id for now
-        # And chapter_id is in the format 'BOOK.CHAPTER', e.g., 'GEN.1'
-        if '.' in chapter_id:
-            book, chapter = chapter_id.split('.')
-            return self._make_request(
+        return self._make_request(
                 self.bibles_api.v4_bible_filesets_show_chapter,
-                bible_id,  # Using bible_id as fileset_id
+                bible_id,
                 book,
                 chapter,
                 **kwargs
             )
-        else:
-            logger.error(f"Invalid chapter_id format: {chapter_id}. Expected format: 'BOOK.CHAPTER'")
-            return {'data': []}
 
     def search(self, bible_id: str, query: str, **kwargs) -> Dict[str, Any]:
         """
