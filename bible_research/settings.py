@@ -25,6 +25,7 @@ with open(CONFIG_FILE, 'r') as f:
 SECRET_KEY = config.get('SECRET_KEY')
 DEBUG = config.get('DEBUG', False)
 ESV_KEY = config.get('ESV_KEY')
+DBT_KEY = config.get('DBT_KEY')
 CONFIG_FILE = BASE_DIR / 'config.yaml'
 
 ALLOWED_HOSTS = [
