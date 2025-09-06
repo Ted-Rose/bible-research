@@ -79,14 +79,14 @@ with openapi_client.ApiClient(configuration) as api_client:
     # Create an instance of the API class
     api_instance = openapi_client.AnnotationsApi(api_client)
     user_id = openapi_client.Id() # Id | The User ID
-bible_id = openapi_client.Id() # Id | Will filter the results by the given bible
-book_id = openapi_client.Id() # Id | Will filter the results by the given book. For a complete list see the `book_id` field in the `/bibles/books` route.
-chapter = openapi_client.ChapterStart() # ChapterStart | Will filter the results by the given chapter
-v = 4 # int | The Version Number
-notes_sort_by = 'notes_sort_by_example' # str | The field to sort by for the notes (optional)
-bookmarks_sort_by = 'bookmarks_sort_by_example' # str | The field to sort by for the bookmarks (optional)
-highlights_sort_by = 'highlights_sort_by_example' # str | The field to sort by for the highlights (optional)
-sort_dir = 'sort_dir_example' # str | The direction to sort by (optional)
+  bible_id = openapi_client.Id() # Id | Will filter the results by the given bible
+  book_id = openapi_client.Id() # Id | Will filter the results by the given book. For a complete list see the `book_id` field in the `/bibles/books` route.
+  chapter = openapi_client.ChapterStart() # ChapterStart | Will filter the results by the given chapter
+  v = 4 # int | The Version Number
+  notes_sort_by = 'notes_sort_by_example' # str | The field to sort by for the notes (optional)
+  bookmarks_sort_by = 'bookmarks_sort_by_example' # str | The field to sort by for the bookmarks (optional)
+  highlights_sort_by = 'highlights_sort_by_example' # str | The field to sort by for the highlights (optional)
+  sort_dir = 'sort_dir_example' # str | The direction to sort by (optional)
 
     try:
         # Download annotations for specific user and bible fileset

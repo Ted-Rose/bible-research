@@ -4,61 +4,17 @@ OpenAPI client.
 """
 import os
 import sys
-import logging
 from typing import Dict, Optional, Any
 from django.conf import settings
-
 # Add the generated client to the Python path
 client_path = os.path.join(os.path.dirname(__file__), 'dbt_client')
 sys.path.append(client_path)
-
-# Add missing model classes to fix OpenAPI client issues
-
-# Base class for all missing models
-class BaseModel(str):
-    """Base class for missing OpenAPI models"""
-    openapi_types = {}
-    attribute_map = {}
-    
-    @classmethod
-    def from_dict(cls, dikt):
-        """Returns the dict as a model"""
-        return cls(dikt)
-
-# Id class for country codes
-class Id(BaseModel):
-    """Custom Id class to fix missing model in OpenAPI client."""
-    pass
-
-# Name class for names
-class Name(BaseModel):
-    """Custom Name class to fix missing model in OpenAPI client."""
-    pass
-
-# Iso class for language codes
-class Iso(BaseModel):
-    """Custom Iso class to fix missing model in OpenAPI client."""
-    pass
-
-# SetTypeCode class for media types
-class SetTypeCode(BaseModel):
-    """Custom SetTypeCode class to fix missing model in OpenAPI client."""
-    pass
-
-# Add the classes to the models module
-import openapi_client.models
-openapi_client.models.Id = Id
-openapi_client.models.Name = Name
-openapi_client.models.Iso = Iso
-openapi_client.models.SetTypeCode = SetTypeCode
-
 from openapi_client.api.bibles_api import BiblesApi
 from openapi_client.api.search_api import SearchApi
+from openapi_client.api.annotations_api import AnnotationsApi
 from openapi_client.configuration import Configuration
 from openapi_client.api_client import ApiClient
 from openapi_client.exceptions import ApiException
-
-logger = logging.getLogger(__name__)
 
 
 class DBTClient:
@@ -75,28 +31,19 @@ class DBTClient:
             api_key: The DBT API key. If not provided, will try to get from
                 environment.
         """
-        # Get the API key from settings or environment if not provided
-        self.api_key = api_key or settings.DBT_KEY or os.environ.get("DBT_API_KEY")
 
-        if not self.api_key:
-            logger.warning("No DBT API key provided. API calls may fail.")
+        api_key = getattr(settings, 'DBT_KEY')
 
-        # Configure the API client
         config = Configuration(
-            host="https://4.dbt.io/api"
+            host="https://4.dbt.io/api",
+            api_key={'key': api_key}
         )
-        
-        # Set up API key for authentication
-        # The API key is set in the configuration's api_key dictionary
-        # The auth_settings method will add it as a query parameter
-        config.api_key['key'] = self.api_key
 
-        # Create API client
         self.api_client = ApiClient(config)
 
-        # Initialize API interfaces
         self.bibles_api = BiblesApi(self.api_client)
         self.search_api = SearchApi(self.api_client)
+        self.annotations_api = AnnotationsApi(self.api_client)
 
     def _make_request(self, request_func, *args, **kwargs):
         """
@@ -113,11 +60,7 @@ class DBTClient:
         # Ensure version is set
         if 'v' not in kwargs:
             kwargs['v'] = 4
-            
-        # Do not add 'key' parameter directly
-        # The OpenAPI client will handle adding the API key as a query parameter
-        # through the auth_settings mechanism in api_client.py
-            
+
         try:
             response = request_func(*args, **kwargs)
             return response
@@ -129,8 +72,6 @@ class DBTClient:
         except Exception as e:
             logger.error(f"Unexpected error: {e}")
             raise
-    
-    # Bible endpoints
 
     def get_bibles(self, language: str = None, **kwargs) -> Dict[str, Any]:
         """
@@ -146,7 +87,7 @@ class DBTClient:
         if language:
             kwargs['language_code'] = language
         return self._make_request(self.bibles_api.v4_bible_all, **kwargs)
-    
+
     def get_bible(self, bible_id: str, **kwargs) -> Dict[str, Any]:
         """
         Get details for a specific Bible.
@@ -163,7 +104,7 @@ class DBTClient:
             bible_id,
             **kwargs
         )
-    
+
     def get_books(self, bible_id: str, **kwargs) -> Dict[str, Any]:
         """
         Get books for a specific Bible.
@@ -180,7 +121,7 @@ class DBTClient:
             bible_id,
             **kwargs
         )
-    
+
     def get_book(self, bible_id: str, book_id: str, **kwargs) -> Dict[str, Any]:
         """
         Get details for a specific book.
@@ -205,8 +146,13 @@ class DBTClient:
                 if book.get('id') == book_id:
                     return {'data': book}
         return {'data': None}
-    
-    def get_chapters(self, bible_id: str, book_id: str, **kwargs) -> Dict[str, Any]:
+
+    def get_chapters(
+        self,
+        bible_id: str,
+        book_id: str,
+        **kwargs
+    ) -> Dict[str, Any]:
         """
         Get chapters for a specific book.
 
@@ -229,8 +175,13 @@ class DBTClient:
                 if book.get('id') == book_id and 'chapters' in book:
                     return {'data': book['chapters']}
         return {'data': []}
-    
-    def get_verses(self, bible_id: str, chapter_id: str, **kwargs) -> Dict[str, Any]:
+
+    def get_verses(
+        self,
+        bible_id: str,
+        chapter_id: str,
+        **kwargs
+    ) -> Dict[str, Any]:
         """
         Get verses for a specific chapter.
 
@@ -257,7 +208,7 @@ class DBTClient:
         else:
             logger.error(f"Invalid chapter_id format: {chapter_id}. Expected format: 'BOOK.CHAPTER'")
             return {'data': []}
-    
+
     def search(self, bible_id: str, query: str, **kwargs) -> Dict[str, Any]:
         """
         Search for text in a specific Bible.
