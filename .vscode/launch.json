@@ -20,6 +20,18 @@
                 "PYTHONPATH": "${workspaceFolder}"
             },
             "justMyCode": true
+        },
+        {
+            "name": "Django Shell",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/manage.py",
+            "args": [
+                "shell"
+            ],
+            "python": "${workspaceFolder}/venv/bin/python",
+            "django": true,
+            "justMyCode": true
         }
     ]
 }
