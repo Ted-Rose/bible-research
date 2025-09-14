@@ -34,6 +34,9 @@ class DBTClient:
 
         api_key = getattr(settings, 'DBT_KEY')
 
+        if not api_key:
+            raise ValueError("DBT_KEY not found in settings.")
+
         config = Configuration(
             host="https://4.dbt.io/api",
             api_key={'key': api_key}
