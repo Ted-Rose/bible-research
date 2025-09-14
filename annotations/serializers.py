@@ -209,7 +209,7 @@ class NoteSerializer(serializers.ModelSerializer):
         if not verses:
             return representation
 
-        book = verses[0].book
+        book = verses[0].dbt_book_id
         chapter = verses[0].chapter
 
         verse_numbers = [v.verse for v in verses]
@@ -226,7 +226,11 @@ class NoteSerializer(serializers.ModelSerializer):
 
         try:
             for verse in verses:
-                text = verse_text['data'][verse.verse - 1].get('verse_text', '')
+                matching_verse = next(
+                    (v for v in verse_text['data'] if v['verse_start'] == verse.verse),
+                    None
+                )
+                text = matching_verse['verse_text'] if matching_verse else ''
                 verse_data = {
                     'book': book,
                     'chapter': chapter,
