@@ -207,7 +207,6 @@ class NoteSerializer(serializers.ModelSerializer):
         representation = super().to_representation(instance)
         verses = list(instance.verses.all().order_by('verse'))
         if not verses:
-            representation['verses'] = []
             return representation
 
         book = verses[0].book
@@ -222,32 +221,27 @@ class NoteSerializer(serializers.ModelSerializer):
             "verse_end": last_verse_num
         }
         dbt_client = DBTClient()
-        verse_content = dbt_client.get_verses(book, chapter, **kwargs)
-        verses_with_content = []
-        
+        verse_text = dbt_client.get_verses(book, chapter, **kwargs)
+        verses_with_text = []
+
         try:
-          for _ in verses:
-            text = # Get current verse number and fetch its text from API response
-            verse_data = {
-                'book': book,
-                'chapter': chapter,
-                'verse': first_verse_num,
-                'text': ''
-            }
-            if verse_content and 'data' in verse_content and verse_content['data']:
-                verse_data['text'] = verse_content['data'][0].get('verse_text', '')
-            else:
-                verse_data['text'] = ''
+            for verse in verses:
+                text = verse_text['data'][verse.verse - 1].get('verse_text', '')
+                verse_data = {
+                    'book': book,
+                    'chapter': chapter,
+                    'verse': verse.verse,
+                    'text': text
+                }
+                verses_with_text.append(verse_data)
         except Exception as e:
-            # If there's an error fetching content, include an empty string
             verse_data['text'] = ''
-            
-        verses_with_content.append(verse_data)
-            
-        representation['verses'] = verses_with_content
-        
+            print(e)
+
+        representation['verses'] = verses_with_text
+
         # Include full tag object if a tag exists
         if instance.tag:
             representation['tag'] = TagSerializer(instance.tag).data
-            
+
         return representation
