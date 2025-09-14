@@ -17,6 +17,7 @@ class Verse(models.Model):
     book = models.CharField(max_length=50)
     chapter = models.IntegerField()
     verse = models.IntegerField()
+    dbt_book_id = models.CharField(max_length=50)
 
     def __str__(self):
         return f'{self.book} {self.chapter}:{self.verse}'

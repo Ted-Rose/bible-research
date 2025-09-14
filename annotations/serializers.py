@@ -2,6 +2,7 @@ from django.contrib.auth import get_user_model
 from rest_framework import serializers
 from bible.models import Verse
 from bible.serializers import VerseSerializer
+from bible.services.dbt.client import DBTClient
 from .models import Note, NoteVerse, Tag
 User = get_user_model()
 
@@ -201,14 +202,50 @@ class NoteSerializer(serializers.ModelSerializer):
     def to_representation(self, instance):
         """
         Overrides the default representation for GET requests to include
-        nested tag and verse data instead of just their IDs.
+        nested tag and verse data with content from DBT API.
         """
-        # Get the default representation
         representation = super().to_representation(instance)
-        # Include full verse objects instead of just IDs
-        verses = instance.verses.all()
-        representation['verses'] = VerseSerializer(verses, many=True).data
+        verses = list(instance.verses.all().order_by('verse'))
+        if not verses:
+            return representation
+
+        book = verses[0].dbt_book_id
+        chapter = verses[0].chapter
+
+        verse_numbers = [v.verse for v in verses]
+        first_verse_num = verse_numbers[0]
+        last_verse_num = verse_numbers[-1]
+
+        kwargs = {
+            "verse_start": first_verse_num,
+            "verse_end": last_verse_num
+        }
+        dbt_client = DBTClient()
+        verse_text = dbt_client.get_verses(book, chapter, **kwargs)
+        verses_with_text = []
+
+        try:
+            for verse in verses:
+                matching_verse = next(
+                    (v for v in verse_text['data'] if v['verse_start'] == verse.verse),
+                    None
+                )
+                text = matching_verse['verse_text'] if matching_verse else ''
+                verse_data = {
+                    'book': book,
+                    'chapter': chapter,
+                    'verse': verse.verse,
+                    'text': text
+                }
+                verses_with_text.append(verse_data)
+        except Exception as e:
+            verse_data['text'] = ''
+            print(e)
+
+        representation['verses'] = verses_with_text
+
         # Include full tag object if a tag exists
         if instance.tag:
             representation['tag'] = TagSerializer(instance.tag).data
+
         return representation
