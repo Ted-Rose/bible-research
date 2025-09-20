@@ -1,20 +1,8 @@
 import logging
 from rest_framework import serializers
-from .models import Verse
 from bible.services.dbt.client import DBTClient
 
 logger = logging.getLogger(__name__)
-
-
-class VerseSerializer(serializers.ModelSerializer):
-    """
-    Serializes Verse model data into JSON format.
-    """
-    class Meta:
-        model = Verse
-        # The 'fields' attribute specifies which model fields to include in the API output.
-        fields = ['id', 'book', 'chapter', 'verse', 'text']
-        read_only_fields = ['id']
 
 
 class BiblePassageSerializer(serializers.Serializer):

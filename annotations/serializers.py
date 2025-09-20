@@ -1,7 +1,6 @@
 from django.contrib.auth import get_user_model
 from rest_framework import serializers
 from bible.models import Verse
-from bible.serializers import VerseSerializer
 from bible.services.dbt.client import DBTClient
 from .models import Note, NoteVerse, Tag
 User = get_user_model()

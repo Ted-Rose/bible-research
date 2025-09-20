@@ -1,27 +1,8 @@
-from rest_framework import viewsets, status
+from rest_framework import status
 from rest_framework.response import Response
-from rest_framework.decorators import action
 from rest_framework.views import APIView
-from .models import Verse
-from .serializers import VerseSerializer, BiblePassageSerializer
-from bible.services.dbt.client import DBTClient
-from .utils.bible_books import get_dbt_book_id
-
-
-class VerseViewSet(viewsets.ReadOnlyModelViewSet):
-    queryset = Verse.objects.all()
-    serializer_class = VerseSerializer
-
-    @action(detail=False, methods=['get'])
-    def search(self, request):
-        query = request.query_params.get('q', None)
-        if not query:
-            return Response(
-                {"error": "A search query parameter 'q' is required."},
-                status=status.HTTP_400_BAD_REQUEST
-            )
-        results = "Some results"
-        return Response(results)
+from .serializers import BiblePassageSerializer
+from bible.utils.bible_books import get_dbt_book_id
 
 
 class BiblePassageView(APIView):
