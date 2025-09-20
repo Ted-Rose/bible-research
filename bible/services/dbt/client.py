@@ -2,10 +2,14 @@
 Client for the Digital Bible Platform (DBT) API using the generated
 OpenAPI client.
 """
+import logging
 import os
 import sys
 from typing import Dict, Optional, Any
 from django.conf import settings
+
+# Set up logging
+logger = logging.getLogger(__name__)
 # Add the generated client to the Python path
 client_path = os.path.join(os.path.dirname(__file__), 'dbt_client')
 sys.path.append(client_path)
