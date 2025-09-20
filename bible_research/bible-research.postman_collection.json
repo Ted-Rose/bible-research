@@ -16,7 +16,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n    \"username\": \"test\",\n    \"password\": \"user\"\n}",
+					"raw": "{\n    \"username\": \"{{username}}\",\n    \"password\": \"{{password}}\"\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -122,7 +122,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n    \"note_text\": \"saasaSssas 7\",\n    \"tag\": \"TAG6ECE9B861F87484\",\n    \"public\": true,\n    \"verse_references\": [\n        {\n            \"book\": \"Exodus\",\n            \"chapter\": 5,\n            \"verse\": 2\n        },\n        {\n            \"book\": \"Exodus\",\n            \"chapter\": 5,\n            \"verse\": 3\n        },\n        {\n            \"book\": \"Exodus\",\n            \"chapter\": 5,\n            \"verse\": 4\n        },\n        {\n            \"book\": \"Exodus\",\n            \"chapter\": 5,\n            \"verse\": 8\n        }\n   ]\n}",
+					"raw": "{\n    \"note_text\": \"saasaSssas 7\",\n    \"tag\": \"TAG87D7CC8A530B4D7\",\n    \"public\": true,\n    \"verse_references\": [\n        {\n            \"book\": \"2 Chronicles\",\n            \"chapter\": 14,\n            \"verse\": 1\n        },\n        {\n            \"book\": \"2 Chronicles\",\n            \"chapter\": 14,\n            \"verse\": 15\n        }\n   ]\n}",
 					"options": {
 						"raw": {
 							"language": "json"
