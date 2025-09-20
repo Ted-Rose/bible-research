@@ -161,3 +161,61 @@ REST_FRAMEWORK = {
         'rest_framework.permissions.IsAuthenticated',  # Default to requiring authentication
     ],
 }
+
+def create_log_handler(handler_name, level, filename=None, max_bytes=10485760, backup_count=10):
+    if DEBUG and filename:
+        # Create logs directory if it doesn't exist
+        logs_dir = os.path.join(BASE_DIR, 'logs')
+        if not os.path.exists(logs_dir):
+            os.makedirs(logs_dir)
+
+        return {
+            'level': level,
+            'class': 'logging.handlers.RotatingFileHandler',
+            'filename': os.path.join(BASE_DIR, 'logs', filename),
+            'maxBytes': max_bytes,  # 10MB
+            'backupCount': backup_count,
+            'formatter': 'verbose',
+        }
+    else:
+        return {
+            'level': level,
+            'class': 'logging.NullHandler',
+        }
+
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'verbose': {
+            'format': '{levelname} {asctime} {module} {process:d} {thread:d} {message}',
+            'style': '{',
+        },
+        'simple': {
+            'format': '{levelname} {message}',
+            'style': '{',
+        },
+    },
+    'handlers': {
+        'console': {
+            'level': 'INFO',
+            'class': 'logging.StreamHandler',
+            'formatter': 'simple',
+        },
+        'file_debug': create_log_handler('file_debug', 'DEBUG', 'debug.log'),
+        'file_error': create_log_handler('file_error', 'ERROR', 'error.log'),
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['console', 'file_debug'],
+            'level': 'INFO',
+            'propagate': True,
+        },
+        'tv_archive': {
+            'handlers': ['console', 'file_debug'],
+            'level': 'DEBUG',
+            'propagate': True,
+        }
+    },
+}
