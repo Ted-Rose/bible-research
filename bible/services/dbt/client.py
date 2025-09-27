@@ -42,7 +42,7 @@ class DBTClient:
             raise ValueError("DBT_KEY not found in settings.")
 
         config = Configuration(
-            host="https://4.dbt.io/api",
+            host="https://b4.dbt.io/api",
             api_key={'key': api_key}
         )
 
@@ -187,7 +187,7 @@ class DBTClient:
         self,
         book: str,
         chapter: str,
-        bible_id: str = "ENGESV",
+        bible_id: str = "ENGESVO1DA-opus16",
         **kwargs
     ) -> Dict[str, Any]:
         """
