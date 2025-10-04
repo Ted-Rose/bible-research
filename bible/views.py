@@ -13,9 +13,17 @@ class BiblePassageView(APIView):
 
     def get(self, request, format=None):
         passage = request.query_params.get('passage')
+        response_format = request.query_params.get('response_format', 'text')
+
         if not passage:
             return Response(
                 {"error": "Passage parameter is required. Example: ?passage=John+3:16"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        if response_format not in ['text', 'audio']:
+            return Response(
+                {"error": "Invalid format. Use 'text' or 'audio'"},
                 status=status.HTTP_400_BAD_REQUEST
             )
 
@@ -43,7 +51,8 @@ class BiblePassageView(APIView):
             data = {
                 'book': book_id,
                 'book_name': book_name,
-                'chapter': chapter
+                'chapter': chapter,
+                'format': response_format,
             }
 
             serializer = BiblePassageSerializer(data=data)
