@@ -23,7 +23,8 @@ class BiblePassageSerializer(serializers.Serializer):
       required=False,
       choices=['text', 'audio'],
       default='text',
-      help_text="Response format: 'text' for text verses, 'audio' for audio links"
+      help_text="Response format: 'text' for text verses, 'audio' for audio \
+        links"
     )
 
     def to_representation(self, instance):
@@ -31,19 +32,20 @@ class BiblePassageSerializer(serializers.Serializer):
         book_id = instance.get('book')
         book_name = instance.get('book_name', '')
         chapter = str(instance.get('chapter'))
-        response_format = instance.get('format', 'text')
-        
-        # Use audio format if requested, otherwise use text
-        bible_id = "ENGESVO1DA-opus16" if response_format == 'audio' else "ENGESV"
+        format = instance.get('format', 'text')
+
+        bible_id = "ENGESVO1DA-opus16" if format == 'audio' else "ENGESV"
 
         try:
-            # Pass the appropriate bible_id based on the format
-            verses_data = dbt_client.get_verses(book_id, chapter, bible_id=bible_id)
+            verses_data = dbt_client.get_verses(
+              book_id,
+              chapter,
+              bible_id=bible_id
+            )
 
             if verses_data and 'data' in verses_data and verses_data['data']:
-                if response_format == 'audio':
-                    # For audio, return the audio URL and metadata
-                    audio_data = verses_data['data'][0]  # Assuming first item contains the audio
+                if format == 'audio':
+                    audio_data = verses_data['data'][0]
                     response_data = {
                         'book': book_id,
                         'book_name': book_name,
@@ -54,7 +56,6 @@ class BiblePassageSerializer(serializers.Serializer):
                         'format': 'audio'
                     }
                 else:
-                    # For text, return the verses
                     response_data = {
                         'book': book_id,
                         'book_name': book_name,
@@ -66,7 +67,7 @@ class BiblePassageSerializer(serializers.Serializer):
                                 'text': verse.get('verse_text', '')
                             }
                             for verse in verses_data['data']
-                            if 'verse_text' in verse  # Only include verses with text
+                            if 'verse_text' in verse
                         ]
                     }
 

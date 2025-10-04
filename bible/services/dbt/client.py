@@ -187,7 +187,7 @@ class DBTClient:
         self,
         book: str,
         chapter: str,
-        bible_id: str = "ENGESVO1DA-opus16",
+        bible_id: str = "ENGESV",
         **kwargs
     ) -> Dict[str, Any]:
         """

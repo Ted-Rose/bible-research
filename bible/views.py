@@ -52,7 +52,7 @@ class BiblePassageView(APIView):
                 'book': book_id,
                 'book_name': book_name,
                 'chapter': chapter,
-                'format': response_format
+                'format': response_format,
             }
 
             serializer = BiblePassageSerializer(data=data)
