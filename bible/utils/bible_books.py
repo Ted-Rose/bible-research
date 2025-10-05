@@ -18,7 +18,7 @@ DBT_BOOK_NAME_TO_ID = {
     'haggai': 'HAG', 'zechariah': 'ZEC', 'malachi': 'MAL',
     # New Testament
     'matthew': 'MAT', 'mark': 'MRK', 'luke': 'LUK',
-    'john': 'JHN', 'acts': 'ACT', 'romans': 'ROM',
+    'john': 'JHN', 'acts of the apostles': 'ACT', 'romans': 'ROM',
     '1 corinthians': '1CO', '2 corinthians': '2CO', 'galatians': 'GAL',
     'ephesians': 'EPH', 'philippians': 'PHP', 'colossians': 'COL',
     '1 thessalonians': '1TH', '2 thessalonians': '2TH', '1 timothy': '1TI',
